@@ -37,6 +37,8 @@ echo --comparison operator--
 try 1 "-1<3"
 try 0 "10<-3"
 try 1 "12>4"
+try 1 "7==7"
+try 0 "3==4"
 try 0 "-12>-3"
 try 1 "-2<=7"
 try 0 "3<=0"
