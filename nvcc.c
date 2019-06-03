@@ -108,6 +108,15 @@ void tokenize() {
       continue;
     }
 
+    if(strncmp(p, "!=", 2) == 0) {
+      tokens[i].ty = TK_NE;
+      tokens[i].input = p;
+      i++;
+      p+=2;
+
+      continue;
+    }
+
     if(strncmp(p, "<=", 2) == 0) {
       tokens[i].ty = TK_LE;
       tokens[i].input = p;
@@ -187,6 +196,8 @@ Node *relational() {
       node = new_node('>', add(), node);
     else if(consume(TK_EQ))
       node = new_node(TK_EQ, node, add());
+    else if(consume(TK_NE))
+      node = new_node(TK_NE, node, add());
     else if(consume(TK_LE))
       node = new_node(TK_LE, node, add());
     else if(consume(TK_GE))
@@ -285,6 +296,11 @@ void gen(Node *node) {
   case TK_EQ:
     printf("  cmp rax, rdi\n");
     printf("  sete al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case TK_NE:
+    printf("  cmp rax, rdi\n");
+    printf("  setne al\n");
     printf("  movzb rax, al\n");
     break;
   case TK_LE:
