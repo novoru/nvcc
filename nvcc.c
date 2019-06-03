@@ -7,6 +7,12 @@
 // トークンの型を表す値
 enum {
   TK_NUM = 256,  // 整数トークン
+  TK_LT,         // <
+  TK_GT,         // >
+  TK_EQ,         // ==
+  TK_NE,         // !=
+  TK_LE,         // <=
+  TK_GE,         // >=
   TK_EOF,        // 入力の終わりを表すトークン
 };
 
@@ -96,7 +102,7 @@ void tokenize() {
     }
 
     if(*p == '+' || *p == '-' || *p == '*' || *p == '/' ||
-       *p == '(' || *p == ')') {
+       *p == '(' || *p == ')' || *p == '<' || *p == '>') {
       tokens[i].ty = *p;
       tokens[i].input = p;
       i++;
@@ -124,10 +130,74 @@ void tokenize() {
   
 }
 
-Node *term();
-Node *mul();
 Node *expr();
+Node *equality();
+Node *relational();
+Node *add();
+Node *mul();
 Node *unary();
+Node *term();
+
+Node *expr() {
+  Node *node = equality();
+
+  return node;
+}
+
+Node *equality() {
+  Node *node = relational();
+
+  // TODO
+  
+  return node;
+}
+
+Node *relational() {
+  Node *node = add();
+
+  for(;;) {
+    if(consume('<'))
+      node = new_node('<', node , add());
+    else if(consume('>'))
+      node = new_node('>', add(), node);
+    return node;
+  }
+}
+
+Node *add() {
+  Node *node = mul();
+
+  for(;;) {
+    if(consume('+'))
+      node = new_node('+', node, mul());
+    else if(consume('-'))
+      node = new_node('-', node, mul());
+    else
+      return node;
+  }
+}
+
+Node *mul() {
+  Node *node = unary();
+
+  for(;;) {
+    if(consume('*'))
+      node = new_node('*', node, unary());
+    else if(consume('/'))
+      node = new_node('/', node, unary());
+    else
+      return node;
+  }
+}
+
+Node *unary() {
+  if(consume('+'))
+    return term();
+  if(consume('-'))
+    return new_node('-', new_node_num(0), term());
+  return term();
+  
+}
 
 Node *term() {
   // 次のトークンが'('なら"(" expr ")"のはず
@@ -146,41 +216,6 @@ Node *term() {
 
   error_at(tokens[pos].input,
 	   "数値でも開きカッコでもないトークンです");
-  
-}
-
-Node *mul() {
-  Node *node = unary();
-
-  for(;;) {
-    if(consume('*'))
-      node = new_node('*', node, unary());
-    else if(consume('/'))
-      node = new_node('/', node, unary());
-    else
-      return node;
-  }
-}
-
-Node *expr() {
-  Node *node = mul();
-
-  for(;;) {
-    if(consume('+'))
-      node = new_node('+', node, mul());
-    else if(consume('-'))
-      node = new_node('-', node, mul());
-    else
-      return node;
-  }
-}
-
-Node *unary() {
-  if(consume('+'))
-    return term();
-  if(consume('-'))
-    return new_node('-', new_node_num(0), term());
-  return term();
   
 }
 
@@ -209,6 +244,12 @@ void gen(Node *node) {
   case '/':
     printf("  cqo\n");
     printf("  idiv rdi\n");
+    break;
+  case '<':
+  case '>':
+    printf("  cmp rax, rdi\n");
+    printf("  setl al\n");
+    printf("  movzb rax, al\n");
     break;
   }
 
