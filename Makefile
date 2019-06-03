@@ -1,4 +1,11 @@
-nvcc: nvcc.c
+CFLAGS=-Wall -std=c11
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:.c=.o)
+
+nvcc: $(OBJS)
+	$(CC) -o nvcc $(OBJS) $(LDFLAGS)
+
+$(OBJS): nvcc.h
 
 test: nvcc
 	bash ./test.sh

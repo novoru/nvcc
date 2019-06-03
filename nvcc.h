@@ -1,12 +1,14 @@
 #ifndef NVCC_H
 #define NVCC_H
 
+#include "nvcc.h"
+
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+ 
 /* container */
 
 // 可変長ベクタ
