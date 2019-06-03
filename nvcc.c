@@ -1,18 +1,4 @@
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-// 入力プログラム
-char *user_input;
-
-// 可変長ベクタ
-typedef struct {
-  void **data;
-  int capacity;
-  int len;
-} Vector;
+#include "nvcc.h"
 
 Vector *new_vector() {
   Vector *vec = malloc(sizeof(Vector));
@@ -32,22 +18,6 @@ void vec_push(Vector *vec, void *elem) {
   vec->data[vec->len++] = elem;
 }
 
-// トークンの型を表す値
-enum {
-  TK_NUM = 256,  // 整数トークン
-  TK_EQ,         // ==
-  TK_NE,         // !=
-  TK_LE,         // <=
-  TK_GE,         // >=
-  TK_EOF,        // 入力の終わりを表すトークン
-};
-
-typedef struct {
-  int ty;       // トークンの型
-  int val;      // tyがTK_NUMだった場合、その数値
-  char *input;  // トークン文字列(エラーメッセージ用)
-} Token;
-
 Token *new_token(int ty) {
   Token *token = malloc(sizeof(Token));
   token->ty = ty;
@@ -64,18 +34,6 @@ Token *new_token_num(int val) {
 
   return token;
 }
-
-// 抽象構文木のノードの型を表す値
-enum {
-  ND_NUM = 256  // 整数のノードの型
-};
-
-typedef struct Node {
-  int ty;             // 演算しかND_NUM
-  struct Node *lhs;   // 左辺
-  struct Node *rhs;   // 右辺
-  int val;            // tyがND_NUMの場合のみ使う
-} Node;
 
 Node *new_node(int ty, Node *lhs, Node *rhs) {
   Node *node = malloc(sizeof(Node));
@@ -94,13 +52,9 @@ Node *new_node_num(int val) {
   return node;
 }
 
-
-// トークナイズした結果のトークン列はこの配列に保存する
-// 100個以上のトークンは来ないものとする
-//Token tokens[100];
 Vector *tokens;
 
-// 現在着目しているトークンのインデックス
+
 int pos;
 
 // 次のトークンが期待した型かどうかをチェックする関数
@@ -199,14 +153,6 @@ void tokenize() {
   vec_push(tokens, (void *) new_token(TK_EOF));
 
 }
-
-Node *expr();
-Node *equality();
-Node *relational();
-Node *add();
-Node *mul();
-Node *unary();
-Node *term();
 
 Node *expr() {
   Node *node = equality();
