@@ -17,6 +17,15 @@ Token *new_token_num(int val) {
   return token;
 }
 
+Token *new_token_ident(char ident) {
+  Token *token = malloc(sizeof(Token));
+  token->ty = TK_IDENT;
+  token->ident = ident;
+  token->input = user_input;
+
+  return token;
+}
+
 // user_inputが指している文字列を
 // トークンに分割してtokensに保存する
 void tokenize() {
@@ -27,6 +36,14 @@ void tokenize() {
     // 空白文字をスキップ
     if(isspace(*p)) {
       p++;
+      continue;
+    }
+
+    if('a' <= *p && *p <= 'z') {
+      vec_push(tokens, (void *) new_token_ident(*p));
+      i++;
+      p++;
+
       continue;
     }
 
@@ -63,7 +80,8 @@ void tokenize() {
     }
     
     if(*p == '+' || *p == '-' || *p == '*' || *p == '/' ||
-       *p == '(' || *p == ')' || *p == '<' || *p == '>') {
+       *p == '(' || *p == ')' || *p == '<' || *p == '>' ||
+       *p == '=' || *p == ';') {
       vec_push(tokens, (void *) new_token((int)*p));
       i++;
       p++;

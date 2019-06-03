@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
- 
+
 /* container */
 
 // 可変長ベクタ
@@ -32,12 +32,15 @@ enum {
   TK_NE,         // !=
   TK_LE,         // <=
   TK_GE,         // >=
+  TK_IDENT,      // 識別子
+  TK_ASSIGN,     // =
   TK_EOF,        // 入力の終わりを表すトークン
 };
 
 typedef struct {
   int ty;       // トークンの型
   int val;      // tyがTK_NUMだった場合、その数値
+  char ident;   // tyがTK_IDENTだった場合、その文字
   char *input;  // トークン文字列(エラーメッセージ用)
 } Token;
 
@@ -49,7 +52,12 @@ void tokenize();
 
 // 抽象構文木のノードの型を表す値
 enum {
-  ND_NUM = 256  // 整数のノードの型
+  ND_NUM = 256,  // 整数のノードの型
+  ND_IDENT,      // 識別子のノードの型
+  ND_EQ,
+  ND_NE,
+  ND_LE,
+  ND_GE,
 };
 
 typedef struct Node {
@@ -57,11 +65,16 @@ typedef struct Node {
   struct Node *lhs;   // 左辺
   struct Node *rhs;   // 右辺
   int val;            // tyがND_NUMの場合のみ使う
+  char name;          // tyがND_IDNETの場合のみ使う
 } Node;
 
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
+Node *new_node_ident(char name);
+void program();
+Node *stmt();
 Node *expr();
+Node *assign();
 Node *equality();
 Node *relational();
 Node *add();
@@ -79,5 +92,6 @@ void gen(Node *node);
 Vector *tokens;    // トークンを格納するためのベクタ
 int pos;           // 現在着目しているトークンのインデックス
 char *user_input;  // 入力プログラム
+Node *code[100];
 
 #endif
