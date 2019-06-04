@@ -58,4 +58,9 @@ try 24 "b=c=2+15*2-8;"
 try 0 "a=b=c=d=e=f=g=h=i=j=k=l=m=n=o=p=q=r=s=t=u=v=x=w=x=y=z=0;"
 echo;
 
+echo --return statement--
+try 0 "return 0;"
+try 23 "return 10*2-1+2*2;"
+echo;
+
 echo OK

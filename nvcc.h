@@ -33,7 +33,7 @@ enum {
   TK_LE,         // <=
   TK_GE,         // >=
   TK_IDENT,      // 識別子
-  TK_ASSIGN,     // =
+  TK_RETURN,     // return
   TK_EOF,        // 入力の終わりを表すトークン
 };
 
@@ -47,6 +47,7 @@ typedef struct {
 Token *new_token(int ty);
 Token *new_token_num(int val);
 void tokenize();
+int is_alnum(char c);
 
 /* parser */
 
@@ -54,6 +55,7 @@ void tokenize();
 enum {
   ND_NUM = 256,  // 整数のノードの型
   ND_IDENT,      // 識別子のノードの型
+  ND_RETURN,
   ND_EQ,
   ND_NE,
   ND_LE,

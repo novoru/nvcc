@@ -39,6 +39,13 @@ void tokenize() {
       continue;
     }
 
+    if(strncmp(p, "return", 6) == 0 && !is_alnum(p[6])) {
+      vec_push(tokens, (void *) new_token(TK_RETURN));
+      i++;
+      p += 6;
+      continue;
+    }
+    
     if('a' <= *p && *p <= 'z') {
       vec_push(tokens, (void *) new_token_ident(*p));
       i++;
@@ -105,3 +112,9 @@ void tokenize() {
 
 }
 
+int is_alnum(char c) {
+  return ('a' <= c && c<= 'z') ||
+         ('A' <= c && c<= 'Z') ||
+         ('0' <= c && c<= '9') ||
+         (c == '_');
+}
