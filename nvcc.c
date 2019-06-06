@@ -13,6 +13,7 @@ int main(int argc, char **argv) {
   
   user_input = argv[1];
   tokens = new_vector();
+  variables = new_map();
   tokenize();
   program();
 
@@ -22,9 +23,11 @@ int main(int argc, char **argv) {
   printf(".global main\n");
   printf("main:\n");
 
-  printf("  push rbp\n");
-  printf("  mov rbp, rsp\n");
-  printf("  sub rsp, 208\n");
+  if(variables->keys > 0) {
+    printf("  push rbp\n");
+    printf("  mov rbp, rsp\n");
+    printf("  sub rsp, %d\n", (variables->keys->len)*8);
+  }
   
   // 先頭の式から順にコード生成
   for(int i = 0; code[i]; i++) {

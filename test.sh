@@ -56,6 +56,9 @@ echo --local variables--
 try 1 "a=1;"
 try 24 "b=c=2+15*2-8;"
 try 0 "a=b=c=d=e=f=g=h=i=j=k=l=m=n=o=p=q=r=s=t=u=v=x=w=x=y=z=0;"
+try 0 "foo=0;"
+try 6 "a=1;b=2;c=3;a+b+c;"
+try 60 "a=3;b=4;c=5;d=a*b*c;"
 echo;
 
 echo --return statement--

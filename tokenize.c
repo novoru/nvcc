@@ -17,7 +17,7 @@ Token *new_token_num(int val) {
   return token;
 }
 
-Token *new_token_ident(char ident) {
+Token *new_token_ident(char *ident) {
   Token *token = malloc(sizeof(Token));
   token->ty = TK_IDENT;
   token->ident = ident;
@@ -47,9 +47,17 @@ void tokenize() {
     }
     
     if('a' <= *p && *p <= 'z') {
-      vec_push(tokens, (void *) new_token_ident(*p));
-      i++;
-      p++;
+      char  *rpos = p;
+      int n = 0;
+      
+      while(is_alnum(*p) && (*p != ' '  || *p != EOF || *p != '\t' ||
+			     *p != '\n' || *p != '\r')) {
+	i++;
+	n++;
+	p++;
+      }
+      
+      vec_push(tokens, (void *) new_token_ident(strndup(rpos, n/sizeof(char))));
 
       continue;
     }

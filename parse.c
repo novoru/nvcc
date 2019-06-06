@@ -17,10 +17,11 @@ Node *new_node_num(int val) {
   return node;
 }
 
-Node *new_node_ident(char name) {
+Node *new_node_ident(char name, int offset) {
   Node *node = malloc(sizeof(Node));
   node->ty = ND_IDENT;
   node->name = name;
+  node->offset = offset;
 
   return node;
 }
@@ -147,12 +148,21 @@ Node *term() {
   }
 
   // そうでなければ数値のはず
-  if(((Token *)tokens->data[pos])->ty == TK_NUM)
+  if(((Token *)tokens->data[pos])->ty == TK_NUM) {
     return new_node_num(((Token *)tokens->data[pos++])->val);
+  }
 
   // そうでなければ識別子のはず
-  if(((Token *)tokens->data[pos])->ty == TK_IDENT)
-    return new_node_ident(((Token *)tokens->data[pos++])->ident);
+  if(((Token *)tokens->data[pos])->ty == TK_IDENT) {
+    int offset = map_get(variables, ((Token *)tokens->data[pos])->ident);
+    if(offset == NULL) {
+      offset = (variables->keys->len + 1) * 8;
+      map_put(variables,
+	      ((Token *)tokens->data[pos])->ident,
+	      offset);
+    }
+    return new_node_ident(((Token *)tokens->data[pos++])->ident, offset);
+  }
   
   error_at(((Token *)tokens->data[pos])->input,
 	   "数値でも識別子でも開きカッコでもないトークンです");

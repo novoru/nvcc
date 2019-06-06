@@ -48,12 +48,13 @@ enum {
 typedef struct {
   int ty;       // トークンの型
   int val;      // tyがTK_NUMだった場合、その数値
-  char ident;   // tyがTK_IDENTだった場合、その文字
+  char *ident;   // tyがTK_IDENTだった場合、その文字列
   char *input;  // トークン文字列(エラーメッセージ用)
 } Token;
 
 Token *new_token(int ty);
 Token *new_token_num(int val);
+Token *new_token_ident(char *ident);
 void tokenize();
 int is_alnum(char c);
 
@@ -75,12 +76,13 @@ typedef struct Node {
   struct Node *lhs;   // 左辺
   struct Node *rhs;   // 右辺
   int val;            // tyがND_NUMの場合のみ使う
-  char name;          // tyがND_IDNETの場合のみ使う
+  char *name;         // tyがND_IDNETの場合のみ使う
+  int offset;         // tyがND_IDENTの場合のみ使う
 } Node;
 
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
-Node *new_node_ident(char name);
+Node *new_node_ident(char name, int offset);
 void program();
 Node *stmt();
 Node *expr();
@@ -103,5 +105,6 @@ Vector *tokens;    // トークンを格納するためのベクタ
 int pos;           // 現在着目しているトークンのインデックス
 char *user_input;  // 入力プログラム
 Node *code[100];
+Map *variables;    // 変数名とベースポインタからのオフセットを格納するためのマップ
 
 #endif
