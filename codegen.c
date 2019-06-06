@@ -46,9 +46,9 @@ void gen(Node *node) {
     gen(node->cond);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
-    printf("  je  .Lend0\n");
+    printf("  je  .Lend%d\n", nlabels);
     gen(node->conseq);
-    printf(".Lend0:\n");
+    printf(".Lend%d:\n", nlabels++);
     return;
   }
 

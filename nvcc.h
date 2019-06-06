@@ -111,5 +111,6 @@ int pos;           // 現在着目しているトークンのインデックス
 char *user_input;  // 入力プログラム
 Node *code[100];
 Map *variables;    // 変数名とベースポインタからのオフセットを格納するためのマップ
+int nlabels;       // if文で使用するラベルの通し番号
 
 #endif
