@@ -50,6 +50,22 @@ Node *stmt() {
     node->ty = ND_RETURN;
     node->lhs = expr();
   }
+  else if(consume(TK_IF)) {
+    node = malloc(sizeof(Node));
+    node->ty = ND_IF;
+    if(consume('(')) {
+      node->cond = expr();
+      if(!consume(')'))
+	error_at(((Token *)tokens->data[pos])->input,
+		 "開きカッコに対応する閉じカッコがありません");
+      node->conseq = stmt();
+
+      return node;
+    }
+    else
+      error_at(((Token *)tokens->data[pos])->input,
+	       "'('ではないトークンです");
+  }
   else {
     node = expr();
   }

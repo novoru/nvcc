@@ -66,4 +66,10 @@ try 0 "return 0;"
 try 23 "return 10*2-1+2*2;"
 echo;
 
+echo --control flow--
+try 1 "if(1) return 1;"
+try 4 "a=1;b=2;if(1) a=b*2; return a;"
+try 1 "a=1;b=2;if(0) a=b*2; return a;"
+echo;
+
 echo OK
