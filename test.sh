@@ -54,6 +54,7 @@ echo;
 
 echo --local variables--
 try 1 "a=1;"
+try 2 "a=1;a+1;"
 try 24 "b=c=2+15*2-8;"
 try 0 "a=b=c=d=e=f=g=h=i=j=k=l=m=n=o=p=q=r=s=t=u=v=x=w=x=y=z=0;"
 try 0 "foo=0;"
@@ -64,6 +65,7 @@ echo;
 echo --return statement--
 try 0 "return 0;"
 try 23 "return 10*2-1+2*2;"
+try 3 "a=1;b=2;return a+b;"
 echo;
 
 echo --control flow--
@@ -74,6 +76,8 @@ try 8 "a=1;b=2;if(1) a=b*2; if(1) a=a*2;"
 try 2 "a=1;b=2;if(0) a=b*2; if(1) a=a*2;"
 try 1 "if(0) return 0; else return 1;"
 try 0 "if(1) return 0; else return 1;"
+try 10 "a=0;while(a<10) a=a+1; return a;"
+try 0  "a=0;b=1;while(0)a=a+1;return a;"
 echo;
 
 echo OK
