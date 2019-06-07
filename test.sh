@@ -72,6 +72,8 @@ try 4 "a=1;b=2;if(1) a=b*2; return a;"
 try 1 "a=1;b=2;if(0) a=b*2; return a;"
 try 8 "a=1;b=2;if(1) a=b*2; if(1) a=a*2;"
 try 2 "a=1;b=2;if(0) a=b*2; if(1) a=a*2;"
+try 1 "if(0) return 0; else return 1;"
+try 0 "if(1) return 0; else return 1;"
 echo;
 
 echo OK

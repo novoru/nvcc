@@ -58,7 +58,11 @@ Node *stmt() {
       if(!consume(')'))
 	error_at(((Token *)tokens->data[pos])->input,
 		 "開きカッコに対応する閉じカッコがありません");
+
       node->conseq = stmt();
+
+      if(consume(TK_ELSE))
+	node->_else = stmt();
 
       return node;
     }

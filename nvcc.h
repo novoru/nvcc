@@ -43,6 +43,7 @@ enum {
   TK_IDENT,      // 識別子
   TK_RETURN,     // return
   TK_IF,         // if
+  TK_ELSE,       // else
   TK_EOF,        // 入力の終わりを表すトークン
 };
 
@@ -67,7 +68,6 @@ enum {
   ND_IDENT,      // 識別子のノードの型
   ND_RETURN,
   ND_IF,
-  ND_COND,
   ND_EQ,
   ND_NE,
   ND_LE,
@@ -83,6 +83,7 @@ typedef struct Node {
   int offset;          // tyがND_IDENTの場合のみ使う
   struct Node *cond;   // tyがND_IFの場合のみ使う
   struct Node *conseq; // tyがND_IFの場合のみ使う
+  struct Node *_else;  // tyがND_IFの場合のみ使う
 } Node;
 
 Node *new_node(int ty, Node *lhs, Node *rhs);
