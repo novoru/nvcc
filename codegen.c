@@ -109,6 +109,11 @@ void gen(Node *node) {
 
     return;
   }
+
+  if(node->ty == ND_FUNC) {
+    printf("  call %s\n", node->name);
+    return;
+  }
   
   gen(node->lhs);
   gen(node->rhs);

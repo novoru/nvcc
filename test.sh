@@ -5,7 +5,7 @@ try() {
     input="$2"
 
     ./nvcc "$input" > tmp.s
-    gcc -o tmp tmp.s
+    gcc -static -o tmp tmp.s tmp-foo.o tmp-bar.o
     ./tmp
     
     actual="$?"
@@ -17,6 +17,9 @@ try() {
 	exit 1
     fi
 }
+
+echo "void foo() { printf(\"OK\\n\"); }" | gcc -xc -c -o tmp-foo.o -
+echo "void bar() { return 42; }" | gcc -xc -c -o tmp-bar.o -
 
 echo --number--
 try 0 "0;"
@@ -87,6 +90,10 @@ try 1 "{i=0;i=i+1;} return i;"
 try 2 "i=0;if(1) {i=1;i=i+1;} return i;"
 try 6 "i=0;if(0) {i=1;i=i+1;} else {i=3;i=i*2;} return i;"
 try 20 "a=0;b=2;for(i=0;i<10;i=i+1) {a=a+b;} return a;"
+echo;
+
+echo --call function--
+try 0 "foo();return 0;"
 echo;
 
 echo OK

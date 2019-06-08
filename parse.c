@@ -137,9 +137,11 @@ Node *stmt() {
     node = expr();
   }
   
-  if(!consume(';'))
+  if(!consume(';')) {
+    fprintf(stderr, "%d\n", ((Token *)tokens->data[pos])->ty);
     error_at(((Token *)tokens->data[pos])->input,
 	     "';'ではないトークンです");
+  }
   return node;
 } 
 
@@ -230,23 +232,39 @@ Node *term() {
     return node;
   }
 
-  // そうでなければ数値のはず
   if(((Token *)tokens->data[pos])->ty == TK_NUM) {
     return new_node_num(((Token *)tokens->data[pos++])->val);
   }
 
-  // そうでなければ識別子のはず
   if(((Token *)tokens->data[pos])->ty == TK_IDENT) {
-    int offset = map_get(variables, ((Token *)tokens->data[pos])->ident);
-    if(offset == NULL) {
-      offset = (variables->keys->len + 1) * 8;
-      map_put(variables,
-	      ((Token *)tokens->data[pos])->ident,
-	      offset);
+    
+    // 識別子の次のトークンが'('の場合は関数名
+    if(((Token *)tokens->data[pos+1])->ty == '(') {
+
+      Node *node = malloc(sizeof(Node));
+      node->ty = ND_FUNC;
+      node->name = ((Token *)tokens->data[pos])->ident;
+
+      pos+=2;
+      
+      if(((Token *)tokens->data[pos++])->ty != ')')
+	error_at(((Token *)tokens->data[pos])->input,
+		 "開きカッコに対応する閉じカッコがありません");
+      return node;
     }
-    return new_node_ident(((Token *)tokens->data[pos++])->ident, offset);
+    //そうでなければ変数名
+    else {
+      int offset = map_get(variables, ((Token *)tokens->data[pos])->ident);
+      if(offset == NULL) {
+	offset = (variables->keys->len + 1) * 8;
+	map_put(variables,
+		((Token *)tokens->data[pos])->ident,
+		offset);
+      }
+      return new_node_ident(((Token *)tokens->data[pos++])->ident, offset);
+    }
   }
-  
+
   error_at(((Token *)tokens->data[pos])->input,
 	   "数値でも識別子でも開きカッコでもないトークンです");
 }
