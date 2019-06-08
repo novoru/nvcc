@@ -82,6 +82,11 @@ try 0  "a=0;while(0)a=a+1;return a;"
 try 20 "a=0;for(i=0;i<10;i=i+1)a=a+2;return a;"
 try 20 "a=0;i=0;for(;i<10;i=i+1)a=a+2;return a;"
 try 10 "i=0;for(;i<10;)i=i+1;return i;"
+try 1 "i=1;{} return i;"
+try 1 "{i=0;i=i+1;} return i;"
+try 2 "i=0;if(1) {i=1;i=i+1;} return i;"
+try 6 "i=0;if(0) {i=1;i=i+1;} else {i=3;i=i*2;} return i;"
+try 20 "a=0;b=2;for(i=0;i<10;i=i+1) {a=a+b;} return a;"
 echo;
 
 echo OK

@@ -124,6 +124,15 @@ Node *stmt() {
     return node;
     
   }
+  else if(consume('{')) {
+    node = malloc(sizeof(Node));
+    node->ty = ND_BLOCK;
+    node->stmts = new_vector();
+    while(!consume('}'))
+      vec_push(node->stmts, (void *)stmt());
+
+    return node;
+  }
   else {
     node = expr();
   }

@@ -94,6 +94,21 @@ void gen(Node *node) {
     printf(".Lend%d:\n", nlabels++);
     return;
   }
+
+  if(node->ty == ND_BLOCK) {
+    for(int i = 0; i < node->stmts->len; i++) {
+      gen((Node *)node->stmts->data[i]);
+      if(i < node->stmts->len-1)
+	printf("  pop rax\n");
+    }
+    
+    // 空のブロック実行後はスタックが空になってしまうため、
+    // スタックにダミーデータを積んでおく
+    if(node->stmts->len == 0)
+      printf("  push 0\n");
+
+    return;
+  }
   
   gen(node->lhs);
   gen(node->rhs);
