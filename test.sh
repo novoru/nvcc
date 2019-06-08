@@ -79,7 +79,9 @@ try 1 "if(0) return 0; else return 1;"
 try 0 "if(1) return 0; else return 1;"
 try 10 "a=0;while(a<10) a=a+1; return a;"
 try 0  "a=0;while(0)a=a+1;return a;"
-try 20  "a=0;for(i=0;i<10;i=i+1)a=a+2;return a;"
+try 20 "a=0;for(i=0;i<10;i=i+1)a=a+2;return a;"
+try 20 "a=0;i=0;for(;i<10;i=i+1)a=a+2;return a;"
+try 10 "i=0;for(;i<10;)i=i+1;return i;"
 echo;
 
 echo OK

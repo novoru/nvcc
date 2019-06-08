@@ -93,21 +93,27 @@ Node *stmt() {
     node->ty = ND_FOR;
 
     if(consume('(')) {
-      node->init = expr();
-      if(!consume(';'))
-	error_at(((Token *)tokens->data[pos])->input,
-		 "';'ではないトークンです");
       
-      node->cond = expr();
-      if(!consume(';'))
-	error_at(((Token *)tokens->data[pos])->input,
-		 "';'ではないトークンです");
-
-      node->update = expr();
-
-      if(!consume(')'))
-	error_at(((Token *)tokens->data[pos])->input,
-		 "開きカッコに対応する閉じカッコがありません");
+      if(!consume(';')) {
+	node->init = expr();
+	if(!consume(';'))
+	  error_at(((Token *)tokens->data[pos])->input,
+		   "';'ではないトークンです");
+      }
+      
+      if(!consume(';')) {
+	node->cond = expr();
+	if(!consume(';'))
+	  error_at(((Token *)tokens->data[pos])->input,
+		   "';'ではないトークンです");
+      }
+      
+      if(!consume(')')) {
+	node->update = expr();
+	if(!consume(')'))
+	  error_at(((Token *)tokens->data[pos])->input,
+		   "開きカッコに対応する閉じカッコがありません");
+      }
     }
     else
       error_at(((Token *)tokens->data[pos])->input,

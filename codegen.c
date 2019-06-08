@@ -81,15 +81,15 @@ void gen(Node *node) {
   }
 
   if(node->ty == ND_FOR) {
-    gen(node->init);
+    if(node->init != NULL) gen(node->init);
     printf(".Lbegin%d:\n", nlabels);
-    gen(node->cond);
+    if(node->cond != NULL) gen(node->cond);
     printf("  mov rax, [rsp]\n");
     printf("  cmp rax, 0\n");
     printf("  je .Lend%d\n", nlabels);
     printf("  sub rsp, 8\n");
     gen(node->conseq);
-    gen(node->update);
+    if(node->update != NULL) gen(node->update);
     printf("  jmp .Lbegin%d\n", nlabels);
     printf(".Lend%d:\n", nlabels++);
     return;
