@@ -111,6 +111,13 @@ void gen(Node *node) {
   }
 
   if(node->ty == ND_FUNC) {
+    if(node->args != NULL) {
+      for(int i = 0; i < node->args->len; i++) {
+	gen((Node *)node->args->data[i]);
+	if(i == 0)
+	  printf("  pop rdi\n");
+      }
+    }
     printf("  call %s\n", node->name);
     return;
   }

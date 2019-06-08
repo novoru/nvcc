@@ -19,7 +19,7 @@ try() {
 }
 
 echo "void foo() { printf(\"OK\\n\"); }" | gcc -xc -c -o tmp-foo.o -
-echo "void bar() { return 42; }" | gcc -xc -c -o tmp-bar.o -
+echo "void bar(int a) { printf(\"%d\\n\", a); }" | gcc -xc -c -o tmp-bar.o -
 
 echo --number--
 try 0 "0;"
@@ -94,6 +94,7 @@ echo;
 
 echo --call function--
 try 0 "foo();return 0;"
+try 0 "bar(4);return 0;"
 echo;
 
 echo OK

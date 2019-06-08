@@ -93,6 +93,7 @@ typedef struct Node {
   struct Node *init;    // tyがND_FORの場合のみ使う
   struct Node *update;  // tyがND_FORの場合のみ使う
   Vector *stmts;        // tyがND_BLOCKの場合のみ使う
+  Vector *args;         // tyがND_FUNCの場合のみ使う
 } Node;
 
 Node *new_node(int ty, Node *lhs, Node *rhs);

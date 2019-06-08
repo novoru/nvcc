@@ -137,11 +137,9 @@ Node *stmt() {
     node = expr();
   }
   
-  if(!consume(';')) {
-    fprintf(stderr, "%d\n", ((Token *)tokens->data[pos])->ty);
+  if(!consume(';'))
     error_at(((Token *)tokens->data[pos])->input,
 	     "';'ではないトークンです");
-  }
   return node;
 } 
 
@@ -237,19 +235,22 @@ Node *term() {
   }
 
   if(((Token *)tokens->data[pos])->ty == TK_IDENT) {
-    
     // 識別子の次のトークンが'('の場合は関数名
     if(((Token *)tokens->data[pos+1])->ty == '(') {
-
+    
       Node *node = malloc(sizeof(Node));
       node->ty = ND_FUNC;
       node->name = ((Token *)tokens->data[pos])->ident;
+      node->args = new_vector();
 
       pos+=2;
-      
-      if(((Token *)tokens->data[pos++])->ty != ')')
-	error_at(((Token *)tokens->data[pos])->input,
-		 "開きカッコに対応する閉じカッコがありません");
+
+      if(((Token *)tokens->data[pos])->ty != ')') {
+	vec_push(node->args, (void *)expr());
+      }
+
+      pos++;
+	
       return node;
     }
     //そうでなければ変数名
