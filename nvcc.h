@@ -46,6 +46,7 @@ enum {
   TK_ELSE,       // else
   TK_WHILE,      // while
   TK_FOR,        // for
+  TK_INT,        // int
   TK_EOF,        // 入力の終わりを表すトークン
 };
 
@@ -74,6 +75,7 @@ enum {
   ND_IF,
   ND_BLOCK,
   ND_FUNC,
+  ND_INT,
   ND_EQ,
   ND_NE,
   ND_LE,

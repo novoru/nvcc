@@ -26,17 +26,176 @@ Node *new_node_ident(char name, int offset) {
   return node;
 }
 
-// 次のトークンが期待した型かどうかをチェックする関数
+// 現在のトークンが期待した型かどうかをチェックする関数
+int cur_token_is(int ty) {
+  return (((Token *) tokens->data[pos])->ty == ty);
+}
+
+// 現在のトークンが期待した型であれば、posをインクリメントする関数
 int consume(int ty) {
-  if(((Token *) tokens->data[pos])->ty != ty)
+  if(!cur_token_is(ty))
     return 0;
   pos++;
   return 1;
 }
 
+// 次のトークンが期待した型かどうかをチェックする関数
+int peek_token_is(int ty) {
+  return (((Token *)tokens->data[pos+1])->ty == ty);
+}
+
+// 次のトークンが期待した型であれば、posをインクリメントする関数
+int consume_peek(int ty) {
+  if(!peek_token_is(ty))
+    return 0;
+  pos++;
+  return 1;
+}
+
+Node * return_stmt() {
+  Node *node = malloc(sizeof(Node));
+  node->ty = ND_RETURN;
+  node->lhs = expr();
+
+  return node;
+}
+
+Node *if_stmt() {
+  Node *node = malloc(sizeof(Node));
+  node->ty = ND_IF;
+  
+  if(consume('(')) {
+    node->cond = expr();
+    if(!consume(')'))
+      error_at(((Token *)tokens->data[pos])->input,
+	       "開きカッコに対応する閉じカッコがありません");
+    
+    node->conseq = stmt();
+    
+    if(consume(TK_ELSE))
+      node->_else = stmt();
+
+    return node;
+  }
+  else
+    error_at(((Token *)tokens->data[pos])->input,
+	     "'('ではないトークンです");
+
+  return node;
+}
+
+Node *while_stmt() {
+  Node *node = malloc(sizeof(Node));
+  node = malloc(sizeof(Node));
+  node->ty = ND_WHILE;
+
+  if(consume('(')) {
+    node->cond = expr();
+    if(!consume(')'))
+      error_at(((Token *)tokens->data[pos])->input,
+	       "開きカッコに対応する閉じカッコがありません");
+    node->conseq = stmt();
+
+    return node;
+  }
+  else
+    error_at(((Token *)tokens->data[pos])->input,
+	     "'('ではないトークンです");
+
+  return node;
+}
+
+Node *for_stmt() {
+  Node *node = malloc(sizeof(Node));
+  node->ty = ND_FOR;
+
+  if(consume('(')) {
+      
+    if(!consume(';')) {
+      node->init = expr();
+      if(!consume(';'))
+	error_at(((Token *)tokens->data[pos])->input,
+		 "';'ではないトークンです");
+    }
+      
+    if(!consume(';')) {
+      node->cond = expr();
+      if(!consume(';'))
+	error_at(((Token *)tokens->data[pos])->input,
+		 "';'ではないトークンです");
+    }
+      
+    if(!consume(')')) {
+      node->update = expr();
+      if(!consume(')'))
+	error_at(((Token *)tokens->data[pos])->input,
+		 "開きカッコに対応する閉じカッコがありません");
+    }
+  }
+  else
+    error_at(((Token *)tokens->data[pos])->input,
+	     "'('ではないトークンです");
+
+  node->conseq = stmt();
+
+  return node;
+}
+
+Node *block_stmt() {
+  Node *node = malloc(sizeof(Node));
+  node->ty = ND_BLOCK;
+  node->stmts = new_vector();
+  while(!consume('}'))
+    vec_push(node->stmts, (void *)stmt());
+
+  return node;
+}
+
+Node *declare_int_stmt() {
+  if(!cur_token_is(TK_IDENT))
+    error_at(((Token *)tokens->data[pos])->input,
+	     "識別子ではないトークンです");
+    
+  int offset = map_get(variables, ((Token *)tokens->data[pos])->ident);
+  if(offset == NULL) {
+    offset = (variables->keys->len + 1) * 8;
+    map_put(variables,
+	    ((Token *)tokens->data[pos])->ident,
+	    offset);
+  }
+
+  return new_node_ident(((Token *)tokens->data[pos++])->ident, offset);
+}
+
+Node *call_func() {
+  Node *node = malloc(sizeof(Node));
+  node->ty = ND_FUNC;
+  node->name = ((Token *)tokens->data[pos++])->ident;
+  node->args = new_vector();
+
+  if(consume_peek(')')) {
+    pos++;
+    return node;
+  }
+
+  pos++;
+      
+  vec_push(node->args, (void *)expr());
+
+  while(consume(',')) {
+    vec_push(node->args, (void *)expr());
+  }
+
+  if(!consume(')'))
+    error_at(((Token *)tokens->data[pos])->input,
+	     "開きカッコに対応する閉じカッコがありません");
+
+  return node;
+}
+
 void program() {
   int i = 0;
-  while(((Token *)tokens->data[pos])->ty != TK_EOF)
+  while(!cur_token_is(TK_EOF))
     code[i++] = stmt();
   code[i] = NULL;
 
@@ -46,92 +205,22 @@ Node *stmt() {
   Node *node;
 
   if(consume(TK_RETURN)) {
-    node = malloc(sizeof(Node));
-    node->ty = ND_RETURN;
-    node->lhs = expr();
+    node = return_stmt();
   }
   else if(consume(TK_IF)) {
-    node = malloc(sizeof(Node));
-    node->ty = ND_IF;
-
-    if(consume('(')) {
-      node->cond = expr();
-      if(!consume(')'))
-	error_at(((Token *)tokens->data[pos])->input,
-		 "開きカッコに対応する閉じカッコがありません");
-
-      node->conseq = stmt();
-
-      if(consume(TK_ELSE))
-	node->_else = stmt();
-
-      return node;
-    }
-    else
-      error_at(((Token *)tokens->data[pos])->input,
-	       "'('ではないトークンです");
+    return if_stmt();
   }
   else if(consume(TK_WHILE)) {
-    node = malloc(sizeof(Node));
-    node->ty = ND_WHILE;
-
-    if(consume('(')) {
-      node->cond = expr();
-      if(!consume(')'))
-	error_at(((Token *)tokens->data[pos])->input,
-		 "開きカッコに対応する閉じカッコがありません");
-      node->conseq = stmt();
-
-      return node;
-    }
-    else
-      error_at(((Token *)tokens->data[pos])->input,
-	       "'('ではないトークンです");
+    return while_stmt();
   }
   else if(consume(TK_FOR)) {
-    node = malloc(sizeof(Node));
-    node->ty = ND_FOR;
-
-    if(consume('(')) {
-      
-      if(!consume(';')) {
-	node->init = expr();
-	if(!consume(';'))
-	  error_at(((Token *)tokens->data[pos])->input,
-		   "';'ではないトークンです");
-      }
-      
-      if(!consume(';')) {
-	node->cond = expr();
-	if(!consume(';'))
-	  error_at(((Token *)tokens->data[pos])->input,
-		   "';'ではないトークンです");
-      }
-      
-      if(!consume(')')) {
-	node->update = expr();
-	if(!consume(')'))
-	  error_at(((Token *)tokens->data[pos])->input,
-		   "開きカッコに対応する閉じカッコがありません");
-      }
-    }
-    else
-      error_at(((Token *)tokens->data[pos])->input,
-	       "'('ではないトークンです");
-
-    node->conseq = stmt();
-
-    return node;
-    
+    return for_stmt();
   }
   else if(consume('{')) {
-    node = malloc(sizeof(Node));
-    node->ty = ND_BLOCK;
-    node->stmts = new_vector();
-    while(!consume('}'))
-      vec_push(node->stmts, (void *)stmt());
-
-    return node;
+    return block_stmt();
+  }
+  else if(consume(TK_INT)) {
+    node = declare_int_stmt();
   }
   else {
     node = expr();
@@ -230,48 +319,29 @@ Node *term() {
     return node;
   }
 
-  if(((Token *)tokens->data[pos])->ty == TK_NUM) {
+  if(cur_token_is(TK_NUM)) {
     return new_node_num(((Token *)tokens->data[pos++])->val);
   }
 
-  if(((Token *)tokens->data[pos])->ty == TK_IDENT) {
-    // 識別子の次のトークンが'('の場合は関数名
-    if(((Token *)tokens->data[pos+1])->ty == '(') {
+  if(cur_token_is(TK_IDENT)) {
     
-      Node *node = malloc(sizeof(Node));
-      node->ty = ND_FUNC;
-      node->name = ((Token *)tokens->data[pos])->ident;
-      node->args = new_vector();
-
-      pos+=2;
-
-      if(((Token *)tokens->data[pos])->ty == ')') {
-	pos++;
-	return node;
-      }
-
-      vec_push(node->args, (void *)expr());
-
-      while(consume(',')) {
-	vec_push(node->args, (void *)expr());
-      }
-
-      if(!consume(')'))
-	error_at(((Token *)tokens->data[pos])->input,
-		 "開きカッコに対応する閉じカッコがありません");
-
-      return node;
+    // 識別子の次のトークンが'('の場合は関数名
+    if(peek_token_is('(')) {
+      return call_func();
     }
     //そうでなければ変数名
     else {
-      int offset = map_get(variables, ((Token *)tokens->data[pos])->ident);
-      if(offset == NULL) {
-	offset = (variables->keys->len + 1) * 8;
-	map_put(variables,
-		((Token *)tokens->data[pos])->ident,
-		offset);
-      }
-      return new_node_ident(((Token *)tokens->data[pos++])->ident, offset);
+
+      char *ident = (char *)((Token *)tokens->data[pos])->ident;
+      int offset = map_get(variables, ident);
+
+      // 定義されていない変数名が現れたらエラー
+      if(offset == NULL)
+	error("定義されていない変数名です: %s", ident);
+
+      pos++;
+      
+      return new_node_ident(ident, offset);
     }
   }
 

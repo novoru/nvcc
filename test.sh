@@ -58,40 +58,39 @@ try 100 "1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1
 echo;
 
 echo --local variables--
-try 1 "a=1;"
-try 2 "a=1;a+1;"
-try 24 "b=c=2+15*2-8;"
-try 0 "a=b=c=d=e=f=g=h=i=j=k=l=m=n=o=p=q=r=s=t=u=v=x=w=x=y=z=0;"
-try 0 "foo=0;"
-try 6 "a=1;b=2;c=3;a+b+c;"
-try 60 "a=3;b=4;c=5;d=a*b*c;"
+try 1 "int a;a=1;"
+try 2 "int a;a=1;a+1;"
+try 24 "int b;int c;b=c=2+15*2-8;"
+try 0 "int foo;foo=0;"
+try 6 "int a; int b; int c; a=1;b=2;c=3;a+b+c;"
+try 60 "int a; int b; int c; int d; a=3;b=4;c=5;d=a*b*c;"
 echo;
 
 echo --return statement--
 try 0 "return 0;"
 try 23 "return 10*2-1+2*2;"
-try 3 "a=1;b=2;return a+b;"
+try 3 "int a; int b; a=1;b=2;return a+b;"
 echo;
 
 echo --control flow--
 try 1 "if(1) return 1;"
-try 4 "a=1;b=2;if(1) a=b*2; return a;"
-try 1 "a=1;b=2;if(0) a=b*2; return a;"
-try 2 "a=1;b=2;if(0) a=b*2; return b;"
-try 8 "a=1;b=2;if(1) a=b*2; if(1) a=a*2;"
-try 2 "a=1;b=2;if(0) a=b*2; if(1) a=a*2;"
+try 4 "int a; int b; a=1;b=2;if(1) a=b*2; return a;"
+try 1 "int a; int b; a=1;b=2;if(0) a=b*2; return a;"
+try 2 "int a; int b; a=1;b=2;if(0) a=b*2; return b;"
+try 8 "int a; int b; a=1;b=2;if(1) a=b*2; if(1) a=a*2;"
+try 2 "int a; int b; a=1;b=2;if(0) a=b*2; if(1) a=a*2;"
 try 1 "if(0) return 0; else return 1;"
 try 0 "if(1) return 0; else return 1;"
-try 10 "a=0;while(a<10) a=a+1; return a;"
-try 0  "a=0;while(0)a=a+1;return a;"
-try 20 "a=0;for(i=0;i<10;i=i+1)a=a+2;return a;"
-try 20 "a=0;i=0;for(;i<10;i=i+1)a=a+2;return a;"
-try 10 "i=0;for(;i<10;)i=i+1;return i;"
-try 1 "i=1;{} return i;"
-try 1 "{i=0;i=i+1;} return i;"
-try 2 "i=0;if(1) {i=1;i=i+1;} return i;"
-try 6 "i=0;if(0) {i=1;i=i+1;} else {i=3;i=i*2;} return i;"
-try 20 "a=0;b=2;for(i=0;i<10;i=i+1) {a=a+b;} return a;"
+try 10 "int a; a=0;while(a<10) a=a+1; return a;"
+try 0  "int a; a=0;while(0)a=a+1;return a;"
+try 20 "int a; a=0; int i;for(i=0;i<10;i=i+1)a=a+2;return a;"
+try 20 "int a; int i; a=0;i=0;for(;i<10;i=i+1)a=a+2;return a;"
+try 10 "int i; i=0;for(;i<10;)i=i+1;return i;"
+try 1 "int i; i=1;{} return i;"
+try 1 "int i; {i=0;i=i+1;} return i;"
+try 2 "int i; i=0;if(1) {i=1;i=i+1;} return i;"
+try 6 "int i; i=0;if(0) {i=1;i=i+1;} else {i=3;i=i*2;} return i;"
+try 20 "int a; int b; int i; a=0;b=2;for(i=0;i<10;i=i+1) {a=a+b;} return a;"
 echo;
 
 echo --call function--
