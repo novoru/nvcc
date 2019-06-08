@@ -88,6 +88,36 @@ Node *stmt() {
       error_at(((Token *)tokens->data[pos])->input,
 	       "'('ではないトークンです");
   }
+  else if(consume(TK_FOR)) {
+    node = malloc(sizeof(Node));
+    node->ty = ND_FOR;
+
+    if(consume('(')) {
+      node->init = expr();
+      if(!consume(';'))
+	error_at(((Token *)tokens->data[pos])->input,
+		 "';'ではないトークンです");
+      
+      node->cond = expr();
+      if(!consume(';'))
+	error_at(((Token *)tokens->data[pos])->input,
+		 "';'ではないトークンです");
+
+      node->update = expr();
+
+      if(!consume(')'))
+	error_at(((Token *)tokens->data[pos])->input,
+		 "開きカッコに対応する閉じカッコがありません");
+    }
+    else
+      error_at(((Token *)tokens->data[pos])->input,
+	       "'('ではないトークンです");
+
+    node->conseq = stmt();
+
+    return node;
+    
+  }
   else {
     node = expr();
   }
