@@ -245,12 +245,21 @@ Node *term() {
 
       pos+=2;
 
-      if(((Token *)tokens->data[pos])->ty != ')') {
+      if(((Token *)tokens->data[pos])->ty == ')') {
+	pos++;
+	return node;
+      }
+
+      vec_push(node->args, (void *)expr());
+
+      while(consume(',')) {
 	vec_push(node->args, (void *)expr());
       }
 
-      pos++;
-	
+      if(!consume(')'))
+	error_at(((Token *)tokens->data[pos])->input,
+		 "開きカッコに対応する閉じカッコがありません");
+
       return node;
     }
     //そうでなければ変数名

@@ -5,7 +5,7 @@ try() {
     input="$2"
 
     ./nvcc "$input" > tmp.s
-    gcc -static -o tmp tmp.s tmp-foo.o tmp-bar.o
+    gcc -static -o tmp tmp.s tmp-foo.o tmp-bar.o tmp-plus.o
     ./tmp
     
     actual="$?"
@@ -20,6 +20,7 @@ try() {
 
 echo "void foo() { printf(\"OK\\n\"); }" | gcc -xc -c -o tmp-foo.o -
 echo "void bar(int a) { printf(\"%d\\n\", a); }" | gcc -xc -c -o tmp-bar.o -
+echo "void plus(int a, int b) { printf(\"%d\\n\", a+b); }" | gcc -xc -c -o tmp-plus.o -
 
 echo --number--
 try 0 "0;"
@@ -95,6 +96,7 @@ echo;
 echo --call function--
 try 0 "foo();return 0;"
 try 0 "bar(4);return 0;"
+try 0 "plus(1,2);return 0;"
 echo;
 
 echo OK

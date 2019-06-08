@@ -116,6 +116,16 @@ void gen(Node *node) {
 	gen((Node *)node->args->data[i]);
 	if(i == 0)
 	  printf("  pop rdi\n");
+	if(i == 1)
+	  printf("  pop rsi\n");
+	if(i == 2)
+	  printf("  pop rdx\n");
+	if(i == 3)
+	  printf("  pop rcx\n");
+	if(i == 4)
+	  printf("  pop r8\n");
+	if(i == 5)
+	  printf("  pop r9\n");
       }
     }
     printf("  call %s\n", node->name);
