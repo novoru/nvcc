@@ -50,13 +50,13 @@ void gen(Node *node) {
     
     if(node->_else == NULL) {
       printf("  je  .Lend%d\n", nlabels);
-      printf("  sub rsp, 8\n");
+      printf("  sub rsp, 16\n");
       gen(node->conseq);
       printf(".Lend%d:\n", nlabels++);
     }
     else {
       printf("  je  .Lelse%d\n", nlabels);
-      printf("  sub rsp, 8\n");
+      printf("  sub rsp, 16\n");
       gen(node->conseq);
       printf("  jmp .Lend%d\n", nlabels);
       printf(".Lelse%d:\n", nlabels);
@@ -73,7 +73,7 @@ void gen(Node *node) {
     printf("  mov rax, [rsp]\n");
     printf("  cmp rax, 0\n");
     printf("  je  .Lend%d\n", nlabels);
-    printf("  sub rsp, 8\n");
+    printf("  sub rsp, 16\n");
     gen(node->conseq);
     printf("  jmp .Lbegin%d\n", nlabels);
     printf(".Lend%d:\n", nlabels++);
@@ -87,7 +87,7 @@ void gen(Node *node) {
     printf("  mov rax, [rsp]\n");
     printf("  cmp rax, 0\n");
     printf("  je .Lend%d\n", nlabels);
-    printf("  sub rsp, 8\n");
+    printf("  sub rsp, 16\n");
     gen(node->conseq);
     if(node->update != NULL) gen(node->update);
     printf("  jmp .Lbegin%d\n", nlabels);
@@ -129,6 +129,7 @@ void gen(Node *node) {
       }
     }
     printf("  call %s\n", node->name);
+    printf("  push rax\n");
     return;
   }
   

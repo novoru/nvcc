@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
   if(variables->keys > 0) {
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    printf("  sub rsp, %d\n", (variables->keys->len)*8);
+    printf("  sub rsp, %d\n", ((variables->keys->len+1) / 2)*16);
   }
   
   // 先頭の式から順にコード生成
@@ -42,5 +42,4 @@ int main(int argc, char **argv) {
   printf("  ret\n");
 
   return 0;
-  
 }
