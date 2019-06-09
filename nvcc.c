@@ -13,19 +13,20 @@ int main(int argc, char **argv) {
   
   user_input = argv[1];
   tokens = new_vector();
-  variables = new_map();
+  global_scope = new_env();
   tokenize();
   program();
 
+  
   // プロローグ
   printf(".intel_syntax noprefix\n");
   printf(".global main\n");
   printf("main:\n");
 
-  if(variables->keys > 0) {
+  if(global_scope->store->keys > 0) {
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    printf("  sub rsp, %d\n", ((variables->keys->len+1) / 2)*16);
+    printf("  sub rsp, %d\n", ((global_scope->store->keys->len+1) / 2)*16);
   }
   
   // 先頭の式から順にコード生成

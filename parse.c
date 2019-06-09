@@ -157,10 +157,10 @@ Node *declare_int_stmt() {
 	     "識別子ではないトークンです");
     
   char *ident = ((Token *)tokens->data[pos++])->ident;
-  int offset = map_get(variables, ident);
+  int offset = (int)get_env(global_scope, ident);
   if(offset == NULL) {
-    offset = (variables->keys->len + 1) * 8;
-    map_put(variables, ident, offset);
+    offset = (global_scope->store->keys->len + 1) * 8;
+    set_env(global_scope, ident, (void *)offset);
   }
 
   return new_node_ident(ident, offset);
@@ -332,7 +332,7 @@ Node *term() {
     else {
 
       char *ident = (char *)((Token *)tokens->data[pos++])->ident;
-      int offset = map_get(variables, ident);
+      int offset = (int)get_env(global_scope, ident);
 
       // 定義されていない変数名が現れたらエラー
       if(offset == NULL)

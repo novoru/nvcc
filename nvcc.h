@@ -26,7 +26,7 @@ typedef struct {
 Vector *new_vector();
 void vec_push(Vector *vec, void *elem);
 Map *new_map();
-void map_put(Map *map, char *key, char *val);
+void map_put(Map *map, char *key, void *val);
 void *map_get(Map *map, char *key);
 int expect(int line, int expected, int actual);
 void runtest();
@@ -149,6 +149,17 @@ int consume(int ty);
 void error(char *fmt, ...);
 void error_at(char *loc, char *msg);
 
+/* Environment */
+typedef struct {
+  Map *store;
+  struct Env *outer;
+} Env;
+
+Env *new_env();
+Env *new_enclosed_env(Env *outer);
+Node *get_env(Env *env, char *name);
+void set_env(Env *env, char *name, Node *elm);
+
 // code generator
 void gen(Node *node);
 
@@ -157,7 +168,7 @@ Vector *tokens;    // トークンを格納するためのベクタ
 int pos;           // 現在着目しているトークンのインデックス
 char *user_input;  // 入力プログラム
 Node *code[100];
-Map *variables;    // 変数名とベースポインタからのオフセットを格納するためのマップ
+Env *global_scope;
 int nlabels;       // if文で使用するラベルの通し番号
 
 #endif
