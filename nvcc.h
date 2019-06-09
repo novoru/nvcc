@@ -7,7 +7,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdnoreturn.h>
 #include <string.h>
+
+/* utility */
+char *format(char *fmt, ...);
 
 /* container */
 
@@ -103,6 +107,7 @@ typedef struct Node {
 	struct {
 	  Vector *args;
 	  struct Node *block;
+	  struct Env *env;
 	}
       };
     };
@@ -133,22 +138,22 @@ typedef struct Node {
   };
 } Node;
 
-Node *new_node(int ty, Node *lhs, Node *rhs);
-Node *new_node_num(int val);
-Node *new_node_ident(char name, int offset);
-void program();
-Node *stmt();
-Node *expr();
-Node *assign();
-Node *equality();
-Node *relational();
-Node *add();
-Node *mul();
-Node *unary();
-Node *term();
-int consume(int ty);
+enum {
+  TY_INT,
+  TY_PTR,
+};
+
+typedef struct {
+  int ty;
+  struct Type *ptr_to;
+} Type;
+
 void error(char *fmt, ...);
 void error_at(char *loc, char *msg);
+char *node_to_str(Node *node);
+void inspect_node(Node *node);
+char *type_to_str(Type *type);
+void inspect_type(Type *type);
 
 /* Environment */
 typedef struct {
@@ -160,6 +165,8 @@ Env *new_env();
 Env *new_enclosed_env(Env *outer);
 Node *get_env(Env *env, char *name);
 void set_env(Env *env, char *name, Node *elm);
+char *env_to_str(Env *env);
+void inspect_env(Env *env);
 
 // code generator
 void gen(Node *node);
