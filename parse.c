@@ -152,23 +152,26 @@ Node *block_stmt() {
 }
 
 Node *declare_int_stmt() {
+  Token *token = ((Token *)tokens->data[pos]);
+  
   if(!cur_token_is(TK_IDENT))
-    error_at(((Token *)tokens->data[pos])->input,
-	     "識別子ではないトークンです");
+    error_at(token->input, "識別子ではないトークンです");
     
-  char *ident = ((Token *)tokens->data[pos++])->ident;
+  char *ident = token->ident;
   int offset = (int)get_env(global_scope, ident);
   if(offset == NULL) {
     offset = (global_scope->store->keys->len + 1) * 8;
     set_env(global_scope, ident, (void *)offset);
   }
 
+  pos++;
+  
   return new_node_ident(ident, offset);
 }
 
 Node *call_func() {
   Node *node = malloc(sizeof(Node));
-  node->ty = ND_FUNC;
+  node->ty = ND_CALL;
   node->name = ((Token *)tokens->data[pos++])->ident;
   node->args = new_vector();
 
@@ -192,10 +195,42 @@ Node *call_func() {
   return node;
 }
 
+Node *function() {
+  Token *token = (Token *)tokens->data[pos];
+
+  if(token->ty != TK_IDENT)
+    error_at(token->input, "関数名ではないトークンです");
+
+  Node *node = malloc(sizeof(Node));
+  node->ty = ND_FUNC;
+  node->name = token->ident;
+  node->args = new_vector();
+
+  pos++;
+  
+  if(!consume('('))
+    error_at(token->input, "'('ではないトークンです");
+
+  while(consume(',')) {
+    vec_push(node->args, (void *)expr());
+  }
+  
+  if(!consume(')'))
+    error_at(token->input, "開きカッコに対応する閉じカッコがありません");
+
+  if(!consume('{'))
+    error_at(token->input, "'{'ではないトークンです");
+
+  node->block = block_stmt();
+  
+  return node;
+  
+}
+
 void program() {
   int i = 0;
   while(!cur_token_is(TK_EOF))
-    code[i++] = stmt();
+    code[i++] = function();
   code[i] = NULL;
 
 }
@@ -224,10 +259,11 @@ Node *stmt() {
   else {
     node = expr();
   }
-  
+
   if(!consume(';'))
     error_at(((Token *)tokens->data[pos])->input,
 	     "';'ではないトークンです");
+
   return node;
 } 
 
@@ -309,6 +345,8 @@ Node *unary() {
 }
 
 Node *term() {
+  Token *token = (Token *)tokens->data[pos];
+  
   // 次のトークンが'('なら"(" expr ")"のはず
   if(consume('(')) {
     Node *node = expr();
@@ -319,7 +357,8 @@ Node *term() {
   }
 
   if(cur_token_is(TK_NUM)) {
-    return new_node_num(((Token *)tokens->data[pos++])->val);
+    pos++;
+    return new_node_num(token->val);
   }
 
   if(cur_token_is(TK_IDENT)) {
@@ -330,8 +369,8 @@ Node *term() {
     }
     //そうでなければ変数名
     else {
-
-      char *ident = (char *)((Token *)tokens->data[pos++])->ident;
+      pos++;
+      char *ident = token->ident;
       int offset = (int)get_env(global_scope, ident);
 
       // 定義されていない変数名が現れたらエラー
@@ -342,8 +381,7 @@ Node *term() {
     }
   }
 
-  error_at(((Token *)tokens->data[pos])->input,
-	   "数値でも識別子でも開きカッコでもないトークンです");
+  error_at(token->input, "数値でも識別子でも開きカッコでもないトークンです");
 }
 
 // エラーを報告するための関数

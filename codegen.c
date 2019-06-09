@@ -110,7 +110,7 @@ void gen(Node *node) {
     return;
   }
 
-  if(node->ty == ND_FUNC) {
+  if(node->ty == ND_CALL) {
     if(node->args != NULL) {
       for(int i = 0; i < node->args->len; i++) {
 	gen((Node *)node->args->data[i]);
@@ -130,6 +130,16 @@ void gen(Node *node) {
     }
     printf("  call %s\n", node->name);
     printf("  push rax\n");
+    return;
+  }
+
+  if(node->ty == ND_FUNC) {
+    printf(".global %s\n", node->name);
+    printf("%s:\n", node->name);
+    printf("  push rbp\n");
+    printf("  mov rbp, rsp\n");
+    gen(node->block);
+    printf("  ret\n");
     return;
   }
   

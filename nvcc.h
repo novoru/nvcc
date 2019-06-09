@@ -57,9 +57,6 @@ typedef struct {
   char *input;  // トークン文字列(エラーメッセージ用)
 } Token;
 
-Token *new_token(int ty);
-Token *new_token_num(int val);
-Token *new_token_ident(char *ident);
 void tokenize();
 int is_alnum(char c);
 
@@ -74,6 +71,7 @@ enum {
   ND_FOR,
   ND_IF,
   ND_BLOCK,
+  ND_CALL,
   ND_FUNC,
   ND_INT,
   ND_EQ,
@@ -101,8 +99,11 @@ typedef struct Node {
 	// ND_IDENT
 	int offset;
 
-	// ND_FUNC
-	Vector *args;
+	// ND_CALL, ND_FUNC
+	struct {
+	  Vector *args;
+	  struct Node *block;
+	}
       };
     };
     
