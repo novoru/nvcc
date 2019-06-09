@@ -52,7 +52,7 @@ int consume_peek(int ty) {
   return 1;
 }
 
-Node * return_stmt() {
+Node *return_stmt() {
   Node *node = malloc(sizeof(Node));
   node->ty = ND_RETURN;
   node->lhs = expr();
@@ -156,15 +156,14 @@ Node *declare_int_stmt() {
     error_at(((Token *)tokens->data[pos])->input,
 	     "識別子ではないトークンです");
     
-  int offset = map_get(variables, ((Token *)tokens->data[pos])->ident);
+  char *ident = ((Token *)tokens->data[pos++])->ident;
+  int offset = map_get(variables, ident);
   if(offset == NULL) {
     offset = (variables->keys->len + 1) * 8;
-    map_put(variables,
-	    ((Token *)tokens->data[pos])->ident,
-	    offset);
+    map_put(variables, ident, offset);
   }
 
-  return new_node_ident(((Token *)tokens->data[pos++])->ident, offset);
+  return new_node_ident(ident, offset);
 }
 
 Node *call_func() {
@@ -332,14 +331,12 @@ Node *term() {
     //そうでなければ変数名
     else {
 
-      char *ident = (char *)((Token *)tokens->data[pos])->ident;
+      char *ident = (char *)((Token *)tokens->data[pos++])->ident;
       int offset = map_get(variables, ident);
 
       // 定義されていない変数名が現れたらエラー
       if(offset == NULL)
 	error("定義されていない変数名です: %s", ident);
-
-      pos++;
       
       return new_node_ident(ident, offset);
     }

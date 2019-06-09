@@ -83,19 +83,53 @@ enum {
 };
 
 typedef struct Node {
-  int ty;               // 演算しかND_NUM
-  struct Node *lhs;     // 左辺
-  struct Node *rhs;     // 右辺
-  int val;              // tyがND_NUMの場合のみ使う
-  char *name;           // tyがND_IDNET,ND_FUNCの場合のみ使う
-  int offset;           // tyがND_IDENTの場合のみ使う
-  struct Node *cond;    // tyがND_IF,ND_FORの場合のみ使う
-  struct Node *conseq;  // tyがND_IF,ND_WHILE,ND_FORの場合のみ使う
-  struct Node *_else;   // tyがND_IFの場合のみ使う
-  struct Node *init;    // tyがND_FORの場合のみ使う
-  struct Node *update;  // tyがND_FORの場合のみ使う
-  Vector *stmts;        // tyがND_BLOCKの場合のみ使う
-  Vector *args;         // tyがND_FUNCの場合のみ使う
+  int ty;
+
+  union {
+  
+    struct {
+      struct Node *lhs;     // 左辺
+      struct Node *rhs;     // 右辺
+    };
+    
+    int val;              // tyがND_NUMの場合のみ使う
+
+    struct {
+      char *name;
+
+      union {
+	// ND_IDENT
+	int offset;
+
+	// ND_FUNC
+	Vector *args;
+      };
+    };
+    
+    // control flow
+    struct {
+      struct Node *cond;
+      struct Node *conseq;
+      
+      union {
+	// ND_IF, ND_WHILE
+	struct {
+	  struct Node *_else;
+	};
+
+	// ND_FOR
+	struct {
+	  struct Node *init;
+	  struct Node *update;
+	};
+      };
+
+    };
+    
+    // ND_BLOCK
+    Vector *stmts;
+
+  };
 } Node;
 
 Node *new_node(int ty, Node *lhs, Node *rhs);
