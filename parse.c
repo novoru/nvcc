@@ -2,7 +2,7 @@
 
 static Node *new_node(int ty, Node *lhs, Node *rhs);
 static Node *new_node_num(int val);
-static Node *new_node_ident(char name, int offset);
+static Node *new_node_ident(char name);
 static Node *stmt(Env *env);
 static Node *expr(Env *env);
 static Node *assign(Env *env);
@@ -32,11 +32,10 @@ static Node *new_node_num(int val) {
   return node;
 }
 
-static Node *new_node_ident(char name, int offset) {
+static Node *new_node_ident(char name) {
   Node *node = malloc(sizeof(Node));
   node->ty = ND_IDENT;
   node->name = name;
-  node->offset = offset;
 
   return node;
 }
@@ -46,6 +45,17 @@ static Type *new_type_int() {
   type->ty = TY_INT;
 
   return type;
+}
+
+static int align(Type *type) {
+  switch(type->ty) {
+  case TY_INT:
+    return 8;
+  case TY_PTR:
+    return 16;
+  default:
+    return 16;
+  }
 }
 
 // 現在のトークンが期待した型かどうかをチェックする関数
@@ -173,24 +183,32 @@ static Node *block_stmt(Env *env) {
   return node;
 }
 
-static Node *declare_int_stmt(Env *env) {
+static Node *declare_int(Env *env) {
   Token *token = ((Token *)tokens->data[pos]);
   
   if(!cur_token_is(TK_IDENT))
     error_at(token->input, "識別子ではないトークンです");
     
-  char *ident = token->ident;
-  int offset = (int)get_env(global_scope, ident);
-  if(offset == NULL) {
-    offset = (global_scope->store->keys->len + 1) * 8;
-    set_env(global_scope, ident, (void *)offset);
+  char *name = token->ident;
+  Node *ident = new_node_ident(name);
+  Type *type = new_type_int();
+
+  Var *var = malloc(sizeof(Var));
+  var->type = type;
+  ident->var = var;
+
+  int offset = 0;
+  for(int i = 0; i < env->store->keys->len; i++) {
+    offset += align(((Var *)env->store->vals->data[i])->type);
   }
 
-  set_env(env, ident, new_type_int());
+  var->offset = offset + align(type);
+  
+  set_env(env, name, var);
   
   pos++;
   
-  return new_node_ident(ident, offset);
+  return ident;
 }
 
 static Node *call_func(Env *env) {
@@ -236,12 +254,15 @@ static Node *function() {
   if(!consume('('))
     error_at(token->input, "'('ではないトークンです");
 
-  while(consume(',')) {
+  if(!consume(')')) {
     vec_push(node->args, (void *)expr(node->env));
+    while(consume(',')) {
+      vec_push(node->args, (void *)expr(node->env));
+    }
+
+    if(!consume(')'))
+      error_at(token->input, "開きカッコに対応する閉じカッコがありません");
   }
-  
-  if(!consume(')'))
-    error_at(token->input, "開きカッコに対応する閉じカッコがありません");
 
   if(!consume('{'))
     error_at(token->input, "'{'ではないトークンです");
@@ -279,7 +300,7 @@ static Node *stmt(Env *env) {
     return block_stmt(env);
   }
   else if(consume(TK_INT)) {
-    node = declare_int_stmt(env);
+    node = declare_int(env);
   }
   else {
     node = expr(env);
@@ -395,14 +416,18 @@ static Node *term(Env *env) {
     //そうでなければ変数名
     else {
       pos++;
+
       char *ident = token->ident;
-      int offset = (int)get_env(global_scope, ident);
+      Var *var = get_env(env, ident);
 
       // 定義されていない変数名が現れたらエラー
-      if(offset == NULL)
+      if(var == NULL)
 	error("定義されていない変数名です: %s", ident);
+
+      Node *node = new_node_ident(ident);
+      node->var = var;
       
-      return new_node_ident(ident, offset);
+      return node;
     }
   }
 
@@ -506,4 +531,16 @@ char *type_to_str(Type *type) {
 
 void inspect_type(Type *type) {
   fprintf(stderr, "type: %s\n", type_to_str(type));
+}
+
+char *var_to_str(Var *var) {
+  char *s = "";
+
+  s = format("type: %s, offset: %d", type_to_str(var->type), var->offset);
+
+  return s;
+}
+
+void inspect_var(Var *var) {
+  fprintf(stderr, "var-> { %s }\n", var_to_str(var));
 }

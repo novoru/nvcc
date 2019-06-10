@@ -16,15 +16,15 @@ Env *new_enclosed_env(Env *outer) {
   return env;
 }
 
-Node *get_env(Env *env, char *name) {
-  Node *node = (Node *)map_get(env->store, name);
-  if(node == NULL && env->outer != NULL)
-    node = (Node *)map_get(env->outer, name);
+Var *get_env(Env *env, char *name) {
+  Var *var = (Var *)map_get(env->store, name);
+  if(var == NULL && env->outer != NULL)
+    var = (Var *)map_get(env->outer, name);
 
-  return node;
+  return var;
 }
 
-void set_env(Env *env, char *name, Node *elm) {
+void set_env(Env *env, char *name, Var *elm) {
   map_put(env->store, name, (void *)elm);
 }
 
@@ -35,9 +35,9 @@ char *env_to_str(Env *env) {
     s = format("%s\n%s", s, env_to_str(env->outer));
 
   for(int i = 0 ; i < env->store->keys->len; i++) {
-    s = format("%s\nkey: %s, elm: %s\n",
+    s = format("%s\t  key: %s, elm: %s\n",
 	   s, (char *)env->store->keys->data[i],
-	   type_to_str((Type *)env->store->vals->data[i]));
+	   var_to_str((Var *)env->store->vals->data[i]));
   }
 
   return s;
@@ -45,5 +45,5 @@ char *env_to_str(Env *env) {
 }
 
 void inspect_env(Env *env) {
-  fprintf(stderr, "%s\n", env_to_str(env));
+  fprintf(stderr, "env -> {\n%s\t}\n", env_to_str(env));
 }

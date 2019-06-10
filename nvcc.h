@@ -101,7 +101,7 @@ typedef struct Node {
 
       union {
 	// ND_IDENT
-	int offset;
+	struct Var *var;
 
 	// ND_CALL, ND_FUNC
 	struct {
@@ -143,10 +143,15 @@ enum {
   TY_PTR,
 };
 
-typedef struct {
+typedef struct Type{
   int ty;
   struct Type *ptr_to;
 } Type;
+
+typedef struct Var{
+  int offset;
+  Type *type;
+} Var;
 
 void error(char *fmt, ...);
 void error_at(char *loc, char *msg);
@@ -163,8 +168,8 @@ typedef struct {
 
 Env *new_env();
 Env *new_enclosed_env(Env *outer);
-Node *get_env(Env *env, char *name);
-void set_env(Env *env, char *name, Node *elm);
+Var *get_env(Env *env, char *name);
+void set_env(Env *env, char *name, Var *elm);
 char *env_to_str(Env *env);
 void inspect_env(Env *env);
 
