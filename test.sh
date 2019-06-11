@@ -46,5 +46,6 @@ try 10 "main() { int a; int b; a = 1; b = 9; return a + b; }"
 try 5  "main() { return plus(3, 2); }"
 try 42 "foo() { return 42; } main() { return foo();}"
 try 5  "foo() { int a; int b; a = 3; b = 4; return a + b; } main() { int a; a = 2; return foo() - a; }"
+try 7  "sub(int a, int b) { return a - b; } main() { return sub(10, 3); }"
 
 echo OK

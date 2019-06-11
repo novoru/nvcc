@@ -15,7 +15,7 @@ static Node *term(Env *env);
 static int consume(int ty);
 
 
-static Node *new_node(int ty, Node *lhs, Node *rhs) {
+static Node *new_node(int ty, Node *lhs, Node *rhs) { 
   Node *node = malloc(sizeof(Node));
   node->ty = ty;
   node->lhs = lhs;
@@ -237,9 +237,41 @@ static Node *call_func(Env *env) {
   return node;
 }
 
+static Node *parse_arg(Env *env) {
+  if(!consume(TK_INT))
+    error_at(((Token *)tokens->data[pos])->input,
+	     "型名ではないトークンです");
+
+  Type *type = new_type_int();
+  Token *token = (Token*)tokens->data[pos];
+  
+  if(!consume(TK_IDENT))
+    error_at(((Token *)tokens->data[pos])->input,
+	     "識別子ではないトークンです");
+
+  
+  Node *node = new_node_ident(token->ident);
+  Var *var = malloc(sizeof(Var));
+  var->type = type;
+  var->isarg = 1;
+
+  int offset = 0;
+  for(int i = 0; i < env->store->keys->len; i++) {
+    offset += align(((Var *)env->store->vals->data[i])->type);
+  }
+
+  var->offset = offset + align(type);
+
+  node->var = var;
+  set_env(env, token->ident, var);
+  
+  return node;
+  
+}
+
 static Node *function() {
   Token *token = (Token *)tokens->data[pos];
-
+  
   if(token->ty != TK_IDENT)
     error_at(token->input, "関数名ではないトークンです");
 
@@ -250,14 +282,14 @@ static Node *function() {
   node->env = new_env();
 
   pos++;
-  
+
   if(!consume('('))
     error_at(token->input, "'('ではないトークンです");
 
   if(!consume(')')) {
-    vec_push(node->args, (void *)expr(node->env));
+    vec_push(node->args, (void *)parse_arg(node->env));
     while(consume(',')) {
-      vec_push(node->args, (void *)expr(node->env));
+      vec_push(node->args, (void *)parse_arg(node->env));
     }
 
     if(!consume(')'))
@@ -268,7 +300,7 @@ static Node *function() {
     error_at(token->input, "'{'ではないトークンです");
 
   node->block = block_stmt(node->env);
-  
+
   return node;
   
 }
@@ -419,14 +451,14 @@ static Node *term(Env *env) {
 
       char *ident = token->ident;
       Var *var = get_env(env, ident);
-
+      
       // 定義されていない変数名が現れたらエラー
       if(var == NULL)
 	error("定義されていない変数名です: %s", ident);
 
       Node *node = new_node_ident(ident);
       node->var = var;
-      
+
       return node;
     }
   }

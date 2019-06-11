@@ -125,12 +125,38 @@ static void gen_func(Node *node) {
   printf("%s:\n", node->name);
   printf("  push rbp\n");
   printf("  mov rbp, rsp\n");
-  // リファクタリングのため一時的に変数100個分の領域を固定で確保
-  //printf("  sub rsp, %d\n", 16 * 100);
+  
   Env *env = node->env;
   printf("  sub rsp, %d\n", 16 * env->store->keys->len);
+
+  // 引数の値をローカル変数に書き出す
+
+  int nargs = 0;
+  for(int i = 0; i < env->store->keys->len; i++) {
+    Var *var = (Var *)env->store->vals->data[i];
+    if(var->isarg) {
+      printf("  mov rax, rbp\n");
+      printf("  sub rax, %d\n", var->offset);
+      printf("  push rax\n");
+      if(nargs == 0) printf("  mov rdi, rdi\n");
+      if(nargs == 1) printf("  mov rdi, rsi\n");
+      if(nargs == 2) printf("  mov rdi, rdx\n");
+      if(nargs == 3) printf("  mov rdi, rcx\n");
+      if(nargs == 4) printf("  mov rdi, r8\n");
+      if(nargs == 5) printf("  mov rdi, r9\n");
+    
+      printf("  pop rax\n");
+      printf("  mov [rax], rdi\n");
+      printf("  push rdi\n");
+
+      nargs++;
+    }
+  }
+
   gen(node->block);
+  
   printf("  ret\n");
+  return;
 }
 
 void gen(Node *node) {

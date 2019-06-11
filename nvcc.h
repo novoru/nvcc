@@ -10,6 +10,8 @@
 #include <stdnoreturn.h>
 #include <string.h>
 
+#define DEBUG 1
+
 /* utility */
 char *format(char *fmt, ...);
 
@@ -151,6 +153,7 @@ typedef struct Type{
 typedef struct Var{
   int offset;
   Type *type;
+  int isarg;
 } Var;
 
 void error(char *fmt, ...);
