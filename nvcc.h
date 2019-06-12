@@ -70,8 +70,10 @@ int is_alnum(char c);
 
 // 抽象構文木のノードの型を表す値
 enum {
-  ND_NUM = 256,  // 整数のノードの型
-  ND_IDENT,      // 識別子のノードの型
+  ND_NUM = 256,
+  ND_IDENT,
+  ND_VARDEF,
+  ND_VARREF,     
   ND_RETURN,
   ND_WHILE,
   ND_FOR,
@@ -110,6 +112,7 @@ typedef struct Node {
 	  Vector *args;
 	  struct Node *block;
 	  struct Env *env;
+	  struct Type *rettype;
 	}
       };
     };
@@ -184,7 +187,6 @@ Vector *tokens;    // トークンを格納するためのベクタ
 int pos;           // 現在着目しているトークンのインデックス
 char *user_input;  // 入力プログラム
 Node *code[100];
-Env *global_scope;
 int nlabels;       // if文で使用するラベルの通し番号
 
 #endif

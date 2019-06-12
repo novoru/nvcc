@@ -48,5 +48,6 @@ try 42 "foo() { return 42; } main() { return foo();}"
 try 5  "foo() { int a; int b; a = 3; b = 4; return a + b; } main() { int a; a = 2; return foo() - a; }"
 try 7  "sub(int a, int b) { return a - b; } main() { return sub(10, 3); }"
 try 8  "fib(int n) { if(n < 2) return 1; return fib(n - 1) + fib(n - 2); } main() { return fib(5);}"
+try 42 "int main() { return 42; }"
 
 echo OK

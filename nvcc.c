@@ -13,7 +13,6 @@ int main(int argc, char **argv) {
   
   user_input = argv[1];
   tokens = new_vector();
-  global_scope = new_env();
   tokenize();
   program();
 

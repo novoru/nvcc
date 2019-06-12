@@ -47,6 +47,13 @@ static Type *new_type_int() {
   return type;
 }
 
+static Type *new_type_ptr() {
+  Type *type = malloc(sizeof(Type));
+  type->ty = TY_PTR;
+
+  return type;
+}
+
 static int align(Type *type) {
   switch(type->ty) {
   case TY_INT:
@@ -269,7 +276,22 @@ static Node *parse_arg(Env *env) {
   
 }
 
+Type *type_specifier() {
+  if(consume(TK_INT)) {
+    return new_type_int();
+  }
+  else if(cur_token_is(TK_IDENT))
+    return NULL;
+  else
+    error_at(((Token *)tokens->data[pos])->input,
+	     "型名でも識別子でもないトークンです");
+}
+
 static Node *function() {
+  
+
+  Type *rettype = type_specifier();
+  
   Token *token = (Token *)tokens->data[pos];
   
   if(token->ty != TK_IDENT)
@@ -280,6 +302,7 @@ static Node *function() {
   node->name = token->ident;
   node->args = new_vector();
   node->env = new_env();
+  node->rettype = rettype;
 
   pos++;
 
