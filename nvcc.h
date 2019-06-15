@@ -72,7 +72,8 @@ int is_alnum(char c);
 enum {
   ND_NUM = 256,
   ND_IDENT,
-  ND_DEREF,
+  ND_DEREF,      // dereference operator '*'
+  ND_ADDR,       // address operator '&'
   ND_VARDEF,
   ND_VARREF,     
   ND_RETURN,

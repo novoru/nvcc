@@ -51,5 +51,7 @@ try 8  "fib(int n) { if(n < 2) return 1; return fib(n - 1) + fib(n - 2); } main(
 try 42 "int main() { return 42; }"
 try 1  "int main() { int *a; int b; b = 1; return b; }"
 try 1  "int main() { int *a; *a = 1; return *a; }"
+try 42 "int main() { int *a; int b; b = 42; a = &b; return *a; }"
+try 42 "int main() { int *a; int *b; int c; c = 42; *b = c; a = &b; return *a; }"
 
 echo OK

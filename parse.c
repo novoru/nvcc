@@ -475,6 +475,8 @@ static Node *unary(Env *env) {
     return new_node_binop('-', new_node_num(0), term(env));
   if(consume('*'))
     return new_expr(ND_DEREF, term(env));
+  if(consume('&'))
+    return new_expr(ND_ADDR, term(env));
   return term(env);
   
 }
