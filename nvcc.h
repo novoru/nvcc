@@ -81,7 +81,6 @@ enum {
   ND_BLOCK,
   ND_CALL,
   ND_FUNC,
-  ND_INT,
   ND_EQ,
   ND_NE,
   ND_LE,
@@ -101,7 +100,7 @@ typedef struct Node {
     int val;              // tyがND_NUMの場合のみ使う
 
     struct {
-      char *name;
+      Token *token;
 
       union {
 	// ND_IDENT
@@ -165,6 +164,8 @@ char *node_to_str(Node *node);
 void inspect_node(Node *node);
 char *type_to_str(Type *type);
 void inspect_type(Type *type);
+char *var_to_str(Var *var);
+void inspect_var(Var *var);
 
 /* Environment */
 typedef struct {

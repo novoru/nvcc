@@ -1,7 +1,7 @@
 #include "nvcc.h"
 
 static void gen_lval(Node *node) {
-  if(node->ty != ND_IDENT)
+  if(node->ty != ND_VARREF && node->ty != ND_VARDEF)
     error(" 代入の左辺値が変数ではありません");
   printf("  mov rax, rbp\n");
   printf("  sub rax, %d\n", node->var->offset);
@@ -116,13 +116,13 @@ static void gen_call(Node *node) {
 	printf("  pop r9\n");
     }
   }
-  printf("  call %s\n", node->name);
+  printf("  call %s\n", node->token->ident);
   printf("  push rax\n");
 }
 
 static void gen_func(Node *node) {
-  printf(".global %s\n", node->name);
-  printf("%s:\n", node->name);
+  printf(".global %s\n", node->token->ident);
+  printf("%s:\n", node->token->ident);
   printf("  push rbp\n");
   printf("  mov rbp, rsp\n");
   
@@ -156,6 +156,7 @@ static void gen_func(Node *node) {
   gen(node->block);
   
   printf("  ret\n");
+
   return;
 }
 
@@ -165,7 +166,7 @@ void gen(Node *node) {
     return;
   }
 
-  if(node->ty == ND_IDENT) {
+  if(node->ty == ND_VARREF || node->ty == ND_VARDEF) {
     gen_lval(node);
     push_var();
     return;

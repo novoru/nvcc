@@ -15,15 +15,13 @@ int main(int argc, char **argv) {
   tokens = new_vector();
   tokenize();
   program();
-
   
   // プロローグ
   printf(".intel_syntax noprefix\n");
 
   // 先頭の式から順にコード生成
-  for(int i = 0; code[i]; i++) {
+  for(int i = 0; code[i]; i++)
     gen(code[i]);
-  }
 
   return 0;
 }
