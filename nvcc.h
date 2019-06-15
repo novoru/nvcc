@@ -72,6 +72,7 @@ int is_alnum(char c);
 enum {
   ND_NUM = 256,
   ND_IDENT,
+  ND_DEREF,
   ND_VARDEF,
   ND_VARREF,     
   ND_RETURN,
@@ -115,6 +116,8 @@ typedef struct Node {
 	}
       };
     };
+
+    struct Node *expr; // expression
     
     // control flow
     struct {

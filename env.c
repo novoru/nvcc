@@ -29,17 +29,19 @@ void set_env(Env *env, char *name, Var *elm) {
 }
 
 char *env_to_str(Env *env) {
-  char *s = "";
+  char *s = "{ ";
 
   while(env->outer != NULL)
-    s = format("%s\n%s", s, env_to_str(env->outer));
+    s = format("%s %s", s, env_to_str(env->outer));
 
   for(int i = 0 ; i < env->store->keys->len; i++) {
-    s = format("%s\t  key: %s, elm: %s\n",
+    s = format("%s key: %s, elm: %s ",
 	   s, (char *)env->store->keys->data[i],
 	   var_to_str((Var *)env->store->vals->data[i]));
   }
 
+  s = format("%s }", s);
+  
   return s;
   
 }

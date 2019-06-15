@@ -3,6 +3,7 @@
 static Node *new_node(int ty, Token *token);
 static Node *new_node_num(int val);
 static Node *new_node_binop(int ty, Node *lhs, Node *rhs);
+static Node *new_expr(int ty, Node *expr);
 static Node *stmt(Env *env);
 static Node *expr(Env *env);
 static Node *assign(Env *env);
@@ -54,12 +55,20 @@ static Type *new_type_ptr() {
   return type;
 }
 
+static Node *new_expr(int ty, Node *expr) {
+  Node *node = malloc(sizeof(Node));
+  node->ty = ty;
+  node->expr = expr;
+
+  return node;
+}
+
 static int align(Type *type) {
   switch(type->ty) {
   case TY_INT:
     return 8;
   case TY_PTR:
-    return 16;
+    return 8;
   default:
     return 16;
   }
@@ -464,6 +473,8 @@ static Node *unary(Env *env) {
     return term(env);
   if(consume('-'))
     return new_node_binop('-', new_node_num(0), term(env));
+  if(consume('*'))
+    return new_expr(ND_DEREF, term(env));
   return term(env);
   
 }
@@ -513,6 +524,7 @@ void error_at(char *loc, char *msg) {
 }
 
 char *node_to_str(Node *node) {
+  if(node == NULL) return "null";
   char *nd = "";
 
   switch(node->ty) {
@@ -579,6 +591,9 @@ char *node_to_str(Node *node) {
     }
     nd = format("%s }, block: %s, rettype: %s}",
 		nd, node_to_str(node->block), type_to_str(node->rettype));
+    break;
+  case ND_DEREF:
+    nd  = format("{ ty: ND_DEREF, expr: %s }", node_to_str(node->expr));
     break;
   case ND_EQ:
     nd = format("{ ty: ND_EQ, lhs: %s, rhs: %s }",

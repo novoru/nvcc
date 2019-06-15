@@ -1,24 +1,35 @@
 #include "nvcc.h"
 
 static void gen_lval(Node *node) {
-  if(node->ty != ND_VARREF && node->ty != ND_VARDEF)
+  printf("#%s: %s\n", __func__, node_to_str(node));
+  if(node->ty == ND_VARREF) {
+    printf("  mov rax, rbp\n");
+    printf("  sub rax, %d\n", node->var->offset);
+    printf("  push rax\n");
+  }
+  else if(ND_DEREF) {
+    printf("  mov rax, rbp\n");
+    printf("  sub rax, %d\n", node->expr->var->offset);
+    printf("  push rax\n");
+  }
+  else
     error(" 代入の左辺値が変数ではありません");
-  printf("  mov rax, rbp\n");
-  printf("  sub rax, %d\n", node->var->offset);
-  printf("  push rax\n");
 }
 
 static void gen_num(Node *node) {
+  printf("#%s: %s\n", __func__, node_to_str(node));
   printf("  push %d\n", node->val);
 }
 
 static void push_var() {
+  printf("#%s\n", __func__);
   printf("  pop rax\n");
   printf("  mov rax, [rax]\n");
   printf("  push rax\n");
 }
 
 static void gen_assign(Node *node) {
+  printf("#%s\n", __func__);
   gen_lval(node->lhs);
   gen(node->rhs);
   
@@ -29,6 +40,7 @@ static void gen_assign(Node *node) {
 }
 
 static void gen_return(Node *node) {
+  printf("#%s\n", __func__);
   gen(node->lhs);
   printf("  pop rax\n");
   printf("  mov rsp, rbp\n");
@@ -127,6 +139,7 @@ static void gen_func(Node *node) {
   printf("  mov rbp, rsp\n");
   
   Env *env = node->env;
+  printf("#%s\n", env_to_str(env));
   printf("  sub rsp, %d\n", 16 * env->store->keys->len);
 
   // 引数の値をローカル変数に書き出す
@@ -166,7 +179,7 @@ void gen(Node *node) {
     return;
   }
 
-  if(node->ty == ND_VARREF || node->ty == ND_VARDEF) {
+  if(node->ty == ND_VARREF) {
     gen_lval(node);
     push_var();
     return;
@@ -211,6 +224,16 @@ void gen(Node *node) {
     gen_func(node);
     return;
   }
+
+  if(node->ty == ND_DEREF) {
+    printf("#ND_DEREF\n");
+    gen_lval(node->expr);
+    push_var();
+    return;
+  }
+
+  if(node->ty == ND_VARDEF)
+    return;
   
   gen(node->lhs);
   gen(node->rhs);
