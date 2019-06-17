@@ -114,7 +114,7 @@ typedef struct Node {
 	  struct Node *block;
 	  struct Env *env;
 	  struct Type *rettype;
-	}
+	};
       };
     };
 

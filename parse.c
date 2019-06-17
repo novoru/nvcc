@@ -4,6 +4,9 @@ static Node *new_node(int ty, Token *token);
 static Node *new_node_num(int val);
 static Node *new_node_binop(int ty, Node *lhs, Node *rhs);
 static Node *new_expr(int ty, Node *expr);
+static Type *new_type_int();
+static Type *new_type_ptr();
+static Type *ptr_to(Type *ty);
 static Node *stmt(Env *env);
 static Node *expr(Env *env);
 static Node *assign(Env *env);
@@ -41,6 +44,14 @@ static Node *new_node(int ty, Token *token) {
   return node;
 }
 
+static Node *new_expr(int ty, Node *expr) {
+  Node *node = malloc(sizeof(Node));
+  node->ty = ty;
+  node->expr = expr;
+
+  return node;
+}
+
 static Type *new_type_int() {
   Type *type = malloc(sizeof(Type));
   type->ty = TY_INT;
@@ -55,12 +66,11 @@ static Type *new_type_ptr() {
   return type;
 }
 
-static Node *new_expr(int ty, Node *expr) {
-  Node *node = malloc(sizeof(Node));
-  node->ty = ty;
-  node->expr = expr;
+static Type *ptr_to(Type *ty) {
+  Type *type = new_type_ptr();
+  type->ptr_to = ty;
 
-  return node;
+  return type;
 }
 
 static int align(Type *type) {
@@ -268,18 +278,11 @@ Type *type_specifier() {
 
 Node *declaration(Env *env) {
 
-  Type *type;
-  Type *tmptype = type_specifier();
+  Type *ty = type_specifier();
 
-  if(consume('*')) {
-    type = new_type_ptr();
-    type->ptr_to = tmptype;
+  while(consume('*')) {
+    ty = ptr_to(ty);
   }
-  else if(cur_token_is(TK_IDENT))
-    type = tmptype;
-  else
-    error_at(((Token *)tokens->data[pos])->input,
-	     "ポインタでも識別子でもないトークンです");
 
   Token *token = (Token *)tokens->data[pos];
   
@@ -289,7 +292,7 @@ Node *declaration(Env *env) {
 
   Node *node = new_node(ND_VARDEF, token);
   Var *var = malloc(sizeof(Var));
-  var->type = type;
+  var->type = ty;
   node->var = var;
 
   int offset = 0;
@@ -297,7 +300,7 @@ Node *declaration(Env *env) {
     offset += align(((Var *)env->store->vals->data[i])->type);
   }
 
-  var->offset = offset + align(type);
+  var->offset = offset + align(ty);
   set_env(env, token->ident, var);
   
   pos++;
@@ -474,7 +477,7 @@ static Node *unary(Env *env) {
   if(consume('-'))
     return new_node_binop('-', new_node_num(0), term(env));
   if(consume('*'))
-    return new_expr(ND_DEREF, term(env));
+    return new_expr(ND_DEREF, unary(env));
   if(consume('&'))
     return new_expr(ND_ADDR, term(env));
   return term(env);

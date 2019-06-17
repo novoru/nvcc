@@ -6,10 +6,13 @@ static void gen_lval(Node *node) {
     printf("  sub rax, %d\n", node->var->offset);
     printf("  push rax\n");
   }
-  else if(node->ty == ND_DEREF || ND_ADDR) {
+  else if(node->ty == ND_ADDR) {
     printf("  mov rax, rbp\n");
     printf("  sub rax, %d\n", node->expr->var->offset);
     printf("  push rax\n");
+  }
+  else if(node->ty == ND_DEREF) {
+    gen_lval(node->expr);
   }
   else
     error(" 代入の左辺値が変数ではありません");

@@ -53,5 +53,7 @@ try 1  "int main() { int *a; int b; b = 1; return b; }"
 try 1  "int main() { int *a; *a = 1; return *a; }"
 try 42 "int main() { int *a; int b; b = 42; a = &b; return *a; }"
 try 42 "int main() { int *a; int *b; int c; c = 42; *b = c; a = &b; return *a; }"
+try 42 "int main() { int **a; **a = 42; return **a; }"
+try 12 "int main() { int ***a; ***a = 4; int ****b; ****b = 3; return ***a * ****b;  }"
 
 echo OK
