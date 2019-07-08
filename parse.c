@@ -73,14 +73,14 @@ static Type *ptr_to(Type *ty) {
   return type;
 }
 
-static int align(Type *type) {
+int align(Type *type) {
   switch(type->ty) {
   case TY_INT:
-    return 8;
+    return 4;
   case TY_PTR:
-    return 8;
+    return align(type->ptr_to);
   default:
-    return 16;
+    return 8;
   }
 }
 
@@ -594,11 +594,14 @@ char *node_to_str(Node *node) {
       else
 	nd = format("%s,%s", nd, str);
     }
-    nd = format("%s }, block: %s, rettype: %s}",
+    nd = format("%s }, block: %s, rettype: %s }",
 		nd, node_to_str(node->block), type_to_str(node->rettype));
     break;
   case ND_DEREF:
     nd  = format("{ ty: ND_DEREF, expr: %s }", node_to_str(node->expr));
+    break;
+  case ND_ADDR:
+    nd  = format("{ ty: ND_ADDR, expr: %s }", node_to_str(node->expr));
     break;
   case ND_EQ:
     nd = format("{ ty: ND_EQ, lhs: %s, rhs: %s }",

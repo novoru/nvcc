@@ -170,6 +170,7 @@ char *type_to_str(Type *type);
 void inspect_type(Type *type);
 char *var_to_str(Var *var);
 void inspect_var(Var *var);
+int align(Type *type);
 
 /* Environment */
 typedef struct {

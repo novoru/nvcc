@@ -1,6 +1,8 @@
 #include "nvcc.h"
 
 static void gen_lval(Node *node) {
+  printf("#%s\n", __func__);
+
   if(node->ty == ND_VARREF) {
     printf("  mov rax, rbp\n");
     printf("  sub rax, %d\n", node->var->offset);
@@ -19,22 +21,59 @@ static void gen_lval(Node *node) {
 }
 
 static void gen_num(Node *node) {
+  printf("#%s\n", __func__);
   printf("  push %d\n", node->val);
 }
 
-static void push_var() {
+static void push_var(Node *node) {
+  printf("#%s\n", __func__);
   printf("  pop rax\n");
-  printf("  mov rax, [rax]\n");
+
+  int varsize = 0;
+  if(node->ty == ND_DEREF) {
+    Node *expr = node->expr;
+    while(expr->ty == ND_DEREF)
+      expr = expr->expr;
+    varsize = align(expr->var->type);
+  }
+  else if(node->ty == ND_ADDR)
+    varsize = align(node->expr->var->type);
+  else
+    varsize = align(node->var->type);
+
+  if(varsize == 4)
+    printf("  movsx rax, DWORD PTR [rax]\n");
+  else if(varsize == 8)
+    printf("  mov rax, [rax]\n");
   printf("  push rax\n");
 }
 
 static void gen_assign(Node *node) {
+  printf("#%s\n", __func__);
+
   gen_lval(node->lhs);
   gen(node->rhs);
-  
+
   printf("  pop rdi\n");
   printf("  pop rax\n");
-  printf("  mov [rax], rdi\n");
+
+  int varsize = 0;
+  if(node->lhs->ty == ND_DEREF) {
+    Node *expr = node->lhs->expr;
+    while(expr->ty == ND_DEREF)
+      expr = expr->expr;
+    varsize = align(expr->var->type);
+  }
+  else
+    varsize = align(node->lhs->var->type);
+
+  if(varsize == 4)
+    printf("  mov DWORD PTR [rax], edi\n");
+  else if(varsize == 8)
+    printf("  mov [rax] rdi\n");
+  else
+    error("不正な型のサイズです:%d\n", varsize);
+
   printf("  push rdi\n");
 }
 
@@ -156,7 +195,12 @@ static void gen_func(Node *node) {
       if(nargs == 5) printf("  mov rdi, r9\n");
     
       printf("  pop rax\n");
-      printf("  mov [rax], rdi\n");
+
+      int varsize = align(var->type);
+      if(varsize == 4)
+	printf("  mov DWORD PTR [rax], edi\n");
+      else if(varsize == 8)
+	printf("  mov [rax], rdi\n");
       printf("  push rdi\n");
 
       nargs++;
@@ -171,6 +215,7 @@ static void gen_func(Node *node) {
 }
 
 void gen(Node *node) {
+  //fprintf(stderr, "node: %s\n", node_to_str(node));
   if(node->ty == ND_NUM) {
     gen_num(node);
     return;
@@ -181,7 +226,7 @@ void gen(Node *node) {
   
   if(node->ty == ND_VARREF) {
     gen_lval(node);
-    push_var();
+    push_var(node);
     return;
   }
 
@@ -227,13 +272,13 @@ void gen(Node *node) {
 
   if(node->ty == ND_DEREF) {
     gen_lval(node->expr);
-    push_var();
+    push_var(node);
     return;
   }
 
   if(node->ty == ND_ADDR) {
     gen_lval(node->expr);
-    push_var();
+    push_var(node);
     return;
   }
 
