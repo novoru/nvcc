@@ -85,6 +85,13 @@ void tokenize() {
       continue;
     }
     
+    if(strncmp(p, "sizeof", 6) == 0 && !is_alnum(p[6])) {
+      vec_push(tokens, (void *) new_token(TK_SIZEOF, p));
+      i++;
+      p += 6;
+      continue;
+    }
+    
     if('a' <= *p && *p <= 'z') {
       char  *rpos = p;
       int n = 0;

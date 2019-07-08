@@ -55,13 +55,15 @@ static Node *new_expr(int ty, Node *expr) {
 static Type *new_type_int() {
   Type *type = malloc(sizeof(Type));
   type->ty = TY_INT;
-
+  type->size = 4;
+  
   return type;
 }
 
 static Type *new_type_ptr() {
   Type *type = malloc(sizeof(Type));
   type->ty = TY_PTR;
+  type->size = 8;
 
   return type;
 }
@@ -69,6 +71,7 @@ static Type *new_type_ptr() {
 static Type *ptr_to(Type *ty) {
   Type *type = new_type_ptr();
   type->ptr_to = ty;
+  type->size = 8;
 
   return type;
 }
@@ -82,6 +85,10 @@ int align(Type *type) {
   default:
     return 8;
   }
+}
+
+Type *get_type(Node *node) {
+  return node->var->type;
 }
 
 // 現在のトークンが期待した型かどうかをチェックする関数
@@ -480,6 +487,8 @@ static Node *unary(Env *env) {
     return new_expr(ND_DEREF, unary(env));
   if(consume('&'))
     return new_expr(ND_ADDR, term(env));
+  if(consume(TK_SIZEOF))
+    return new_node_num(get_type(unary(env))->size);
   return term(env);
   
 }

@@ -58,4 +58,7 @@ try 42 "int main() { int *a; int *b; int c; c = 42; *b = c; a = &b; return *a; }
 try 42 "int main() { int **a; **a = 42; return **a; }"
 try 12 "int main() { int ***a; ***a = 4; int ****b; ****b = 3; return ***a * ****b;  }"
 
+try 4  "int main() { int a; return sizeof(a); }"
+try 8  "int main() { int *a; return sizeof(a); }"
+
 echo OK

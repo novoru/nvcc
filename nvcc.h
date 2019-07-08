@@ -53,6 +53,7 @@ enum {
   TK_WHILE,      // while
   TK_FOR,        // for
   TK_INT,        // int
+  TK_SIZEOF,     // sizeof
   TK_EOF,        // 入力の終わりを表すトークン
 };
 
@@ -154,6 +155,7 @@ enum {
 typedef struct Type{
   int ty;
   struct Type *ptr_to;
+  int size;
 } Type;
 
 typedef struct Var{
