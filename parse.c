@@ -88,7 +88,24 @@ int align(Type *type) {
 }
 
 Type *get_type(Node *node) {
-  return node->var->type;
+  switch(node->ty) {
+  case ND_NUM:
+    return new_type_int();
+  case ND_VARREF:
+    return node->var->type;
+  case ND_DEREF:
+    return get_type(node->expr)->ptr_to;
+  case '+':
+  case '-':
+  case '*':
+  case '/':
+    ;
+    int lsize = get_type(node->lhs)->size;
+    int rsize = get_type(node->rhs)->size;
+    return lsize > rsize ? get_type(node->lhs) : get_type(node->rhs);
+  default:
+    error("unknown\n");
+  }
 }
 
 // 現在のトークンが期待した型かどうかをチェックする関数
